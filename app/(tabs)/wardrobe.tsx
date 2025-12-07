@@ -1,13 +1,15 @@
-
 import { ThemedText } from '@/components/themed-text';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function HomeScreen() {
+const WardrobeScreen = () => {
   return (
     <SafeAreaView>
       <ThemedText>
-        Home page under construction...
+        Wardrobe page under construction...
       </ThemedText>
     </SafeAreaView>
   );
-}
+};
+
+export default WardrobeScreen;

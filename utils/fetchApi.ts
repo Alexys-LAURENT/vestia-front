@@ -1,0 +1,180 @@
+import type {
+  ApiError,
+  PaginatedResponse,
+  SuccessMessageResponse,
+  SuccessResponse,
+} from '@/types/requests';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+
+// Type union pour toutes les réponses possibles
+type ApiResponse<T> = SuccessResponse<T> | SuccessMessageResponse | PaginatedResponse<T> | ApiError;
+
+interface FetchApiOptions extends Omit<RequestInit, 'body'> {
+  requireAuth?: boolean;
+  body?: any;
+}
+
+// Classe d'erreur custom pour les erreurs API
+export class FetchApiError extends Error {
+  status: number;
+  apiError: ApiError;
+
+  constructor(status: number, apiError: ApiError) {
+    const message = 'message' in apiError ? apiError.message : 'Erreur de validation';
+    super(message);
+    this.name = 'FetchApiError';
+    this.status = status;
+    this.apiError = apiError;
+  }
+
+  isValidationError(): boolean {
+    return 'validation' in this.apiError;
+  }
+
+  isNotFoundError(): boolean {
+    return 'exists' in this.apiError && this.apiError.exists === false;
+  }
+}
+
+// Récupérer le token stocké
+const getStoredToken = async (): Promise<string | null> => {
+  try {
+    let sessionStr: string | null = null;
+
+    if (Platform.OS === 'web') {
+      sessionStr = localStorage.getItem('session');
+    } else {
+      sessionStr = await SecureStore.getItemAsync('session');
+    }
+
+    if (sessionStr) {
+      const session = JSON.parse(sessionStr);
+      return session?.accessToken?.token ?? null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Type guard pour vérifier si c'est une erreur API
+const isApiError = (response: any): response is ApiError => {
+  return response && response.error === true;
+};
+
+// Fonction principale
+export const fetchApi = async <T>(
+  endpoint: string,
+  options: FetchApiOptions = {}
+): Promise<SuccessResponse<T> | SuccessMessageResponse | PaginatedResponse<T>> => {
+  const { requireAuth = true, headers: customHeaders, body, ...restOptions } = options;
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...customHeaders,
+  };
+
+  // Ajouter le token si nécessaire
+  if (requireAuth) {
+    const token = await getStoredToken();
+    if (token) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  const API_URL = process.env.EXPO_PUBLIC_API_URL
+  console.log(API_URL);
+  
+  if(!API_URL){
+    throw new Error('EXPO_PUBLIC_API_URL is not defined in environment variables');
+  }
+  const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
+
+  try {
+    const response = await fetch(url, {
+      ...restOptions,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    const contentType = response.headers.get('content-type');
+    let data: ApiResponse<T>;
+
+    if (contentType?.includes('application/json')) {
+      data = await response.json();
+    } else {
+      throw new FetchApiError(response.status, {
+        error: true,
+        message: await response.text(),
+      });
+    }
+
+    // Vérifier si c'est une erreur API
+    if (isApiError(data)) {
+      throw new FetchApiError(response.status, data);
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof FetchApiError) {
+      throw error;
+    }
+
+    // Erreur réseau
+    throw new FetchApiError(0, {
+      error: true,
+      message: error instanceof Error ? error.message : 'Erreur réseau',
+    });
+  }
+};
+/**
+ * Helpers pour les méthodes HTTP courantes
+ * @example ```
+ *  import { api, FetchApiError } from '@/utils/fetchApi';
+    import type { SuccessResponse, PaginatedResponse } from '@/types/requests';
+
+    // GET simple avec data typée
+    const response = await api.get<User[]>('/users') as SuccessResponse<User[]>;
+    console.log(response.data); // User[]
+
+    // GET paginé
+    const paginated = await api.get<User[]>('/users?page=1') as PaginatedResponse<User[]>;
+    console.log(paginated.data.meta.total);
+    console.log(paginated.data.data); // User[]
+
+    // POST sans auth
+    const result = await api.post('/auth/login', { email, password }, { requireAuth: false });
+
+    // Gestion des erreurs
+    try {
+      await api.post('/auth/register', userData, { requireAuth: false });
+    } catch (error) {
+      if (error instanceof FetchApiError) {
+        if (error.isValidationError()) {
+          console.log('Validation:', error.apiError.validation);
+        } else if (error.isNotFoundError()) {
+          console.log('Ressource non trouvée');
+        } else {
+          console.log('Erreur:', error.message);
+        }
+      }
+    }
+  ```
+ */
+export const api = {
+  get: <T>(endpoint: string, options?: Omit<FetchApiOptions, 'body'>) =>
+    fetchApi<T>(endpoint, { ...options, method: 'GET' }),
+
+  post: <T>(endpoint: string, body?: any, options?: Omit<FetchApiOptions, 'body'>) =>
+    fetchApi<T>(endpoint, { ...options, method: 'POST', body }),
+
+  put: <T>(endpoint: string, body?: any, options?: Omit<FetchApiOptions, 'body'>) =>
+    fetchApi<T>(endpoint, { ...options, method: 'PUT', body }),
+
+  patch: <T>(endpoint: string, body?: any, options?: Omit<FetchApiOptions, 'body'>) =>
+    fetchApi<T>(endpoint, { ...options, method: 'PATCH', body }),
+
+  delete: <T>(endpoint: string, options?: Omit<FetchApiOptions, 'body'>) =>
+    fetchApi<T>(endpoint, { ...options, method: 'DELETE' }),
+};
