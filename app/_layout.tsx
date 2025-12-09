@@ -3,11 +3,14 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import { ImagePickerProvider, ImagePickerSheetRenderer } from '@/components/media-gallery';
 import { SessionProvider, useSession } from '@/contexts/SessionContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SplashScreenController } from '../splash';
 
-
+import "../global.css";
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -20,9 +23,16 @@ export default function Root() {
   return (
     <SessionProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        <ImagePickerProvider>
 
       <SplashScreenController />
       <RootNavigator />
+       <ImagePickerSheetRenderer />
+        </ImagePickerProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
     </ThemeProvider>
 
 
