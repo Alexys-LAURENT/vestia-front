@@ -1,8 +1,9 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Item } from '@/types/entities';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface ItemCardProps {
   item: Item;
@@ -11,11 +12,21 @@ interface ItemCardProps {
 const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2;
 
 export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
+  const router = useRouter();
   const cardBackground = useThemeColor({}, 'background');
   const borderColor = useThemeColor({}, 'icon');
   const API_URL = process.env.EXPO_PUBLIC_API_URL
+
+  const handlePress = () => {
+    router.push(`/item/${item.idItem}`);
+  };
+
   return (
-    <View style={[styles.card, { backgroundColor: cardBackground, borderColor }]}>
+    <TouchableOpacity 
+      style={[styles.card, { backgroundColor: cardBackground, borderColor }]}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
       <Image
         source={{ uri: `${API_URL}${item.imageUrl}` }}
         style={styles.image}
@@ -34,7 +45,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
           </ThemedText>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

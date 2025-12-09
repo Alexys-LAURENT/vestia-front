@@ -29,10 +29,12 @@ export interface AnalyzingStepProps extends StepProps {
 // Props pour ItemForm
 export interface ItemFormProps extends StepProps {
   selectedImage: MediaAssetWithUri | null;
+  imageUrl?: string | null;
   formState: ItemFormState;
   onUpdateField: <K extends keyof ItemFormState>(field: K, value: ItemFormState[K]) => void;
   onSubmit: () => void;
   isSubmitDisabled: boolean;
+  submitButtonText?: string;
 }
 
 // Props pour SubmittingStep

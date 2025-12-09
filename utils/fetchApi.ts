@@ -63,7 +63,7 @@ const isApiError = (response: any): response is ApiError => {
 export const fetchApi = async <T>(
   endpoint: string,
   options: FetchApiOptions = {}
-): Promise<T> => {
+): Promise<T | ApiError> => {
   const { requireAuth = true, headers: customHeaders, body, isFormData = false, ...restOptions } = options;
 
   const headers: HeadersInit = {
@@ -173,6 +173,9 @@ export const api = {
 
   put: <T>(endpoint: string, body?: any, options?: Omit<FetchApiOptions, 'body'>) =>
     fetchApi<T>(endpoint, { ...options, method: 'PUT', body }),
+
+  putFormData: <T>(endpoint: string, formData: FormData, options?: Omit<FetchApiOptions, 'body' | 'isFormData'>) =>
+    fetchApi<T>(endpoint, { ...options, method: 'PUT', body: formData, isFormData: true }),
 
   patch: <T>(endpoint: string, body?: any, options?: Omit<FetchApiOptions, 'body'>) =>
     fetchApi<T>(endpoint, { ...options, method: 'PATCH', body }),

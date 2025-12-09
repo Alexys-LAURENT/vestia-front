@@ -13,14 +13,16 @@ import type { ItemFormProps } from './types';
 
 export const ItemForm = ({
   selectedImage,
+  imageUrl,
   formState,
   onUpdateField,
   onSubmit,
   isSubmitDisabled,
   tintColor,
   textColor,
+  submitButtonText = 'Ajouter à ma garde-robe',
 }: ItemFormProps) => {
-  const imageUri = selectedImage?.croppedUri || selectedImage?.localUri || selectedImage?.uri;
+  const imageUri = imageUrl || selectedImage?.croppedUri || selectedImage?.localUri || selectedImage?.uri;
 
   return (
     <BottomSheetScrollView style={styles.container}>
@@ -131,7 +133,7 @@ export const ItemForm = ({
         onPress={onSubmit}
         disabled={isSubmitDisabled}
       >
-        <Text style={styles.submitButtonText}>Ajouter à ma garde-robe</Text>
+        <Text style={styles.submitButtonText}>{submitButtonText}</Text>
       </TouchableOpacity>
 
       <View style={{ height: 50 }} />
