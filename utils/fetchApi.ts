@@ -1,18 +1,14 @@
 import type {
-  ApiError,
-  PaginatedResponse,
-  SuccessMessageResponse,
-  SuccessResponse,
+  ApiError
 } from '@/types/requests';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-// Type union pour toutes les réponses possibles
-type ApiResponse<T> = SuccessResponse<T> | SuccessMessageResponse | PaginatedResponse<T> | ApiError;
 
 interface FetchApiOptions extends Omit<RequestInit, 'body'> {
   requireAuth?: boolean;
   body?: any;
+  isFormData?: boolean;
 }
 
 // Classe d'erreur custom pour les erreurs API
@@ -67,14 +63,18 @@ const isApiError = (response: any): response is ApiError => {
 export const fetchApi = async <T>(
   endpoint: string,
   options: FetchApiOptions = {}
-): Promise<SuccessResponse<T> | SuccessMessageResponse | PaginatedResponse<T>> => {
-  const { requireAuth = true, headers: customHeaders, body, ...restOptions } = options;
+): Promise<T> => {
+  const { requireAuth = true, headers: customHeaders, body, isFormData = false, ...restOptions } = options;
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
     ...customHeaders,
   };
+
+  // Ne pas définir Content-Type pour FormData (le navigateur le fait automatiquement avec le boundary)
+  if (!isFormData) {
+    (headers as Record<string, string>)['Content-Type'] = 'application/json';
+  }
 
   // Ajouter le token si nécessaire
   if (requireAuth) {
@@ -84,7 +84,6 @@ export const fetchApi = async <T>(
     }
   }
   const API_URL = process.env.EXPO_PUBLIC_API_URL
-  console.log(API_URL);
   
   if(!API_URL){
     throw new Error('EXPO_PUBLIC_API_URL is not defined in environment variables');
@@ -95,11 +94,11 @@ export const fetchApi = async <T>(
     const response = await fetch(url, {
       ...restOptions,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
+      body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
+    });    
 
     const contentType = response.headers.get('content-type');
-    let data: ApiResponse<T>;
+    let data: T | ApiError;
 
     if (contentType?.includes('application/json')) {
       data = await response.json();
@@ -168,6 +167,9 @@ export const api = {
 
   post: <T>(endpoint: string, body?: any, options?: Omit<FetchApiOptions, 'body'>) =>
     fetchApi<T>(endpoint, { ...options, method: 'POST', body }),
+
+  postFormData: <T>(endpoint: string, formData: FormData, options?: Omit<FetchApiOptions, 'body' | 'isFormData'>) =>
+    fetchApi<T>(endpoint, { ...options, method: 'POST', body: formData, isFormData: true }),
 
   put: <T>(endpoint: string, body?: any, options?: Omit<FetchApiOptions, 'body'>) =>
     fetchApi<T>(endpoint, { ...options, method: 'PUT', body }),

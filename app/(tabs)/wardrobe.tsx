@@ -48,7 +48,7 @@ const WardrobeScreen = () => {
     refresh: refreshItems,
     loadMore: loadMoreItems,
   } = usePaginatedFetch<Item>('/items', itemsParams, { enabled: activeTab === 'items' });
-
+  
   // Fetch looks
   const {
     data: looks,
@@ -171,6 +171,7 @@ const WardrobeScreen = () => {
     <AddItemSheet 
     isOpen={isAddItemSheetOpen} 
     onClose={() => setIsAddItemSheetOpen(false)}
+    onSuccess={refreshItems}
     />
     </>
   );

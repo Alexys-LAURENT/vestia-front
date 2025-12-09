@@ -13,11 +13,11 @@ const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2;
 export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
   const cardBackground = useThemeColor({}, 'background');
   const borderColor = useThemeColor({}, 'icon');
-
+  const API_URL = process.env.EXPO_PUBLIC_API_URL
   return (
     <View style={[styles.card, { backgroundColor: cardBackground, borderColor }]}>
       <Image
-        source={{ uri: item.imageUrl }}
+        source={{ uri: `${API_URL}${item.imageUrl}` }}
         style={styles.image}
         resizeMode="cover"
       />
@@ -34,7 +34,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
           </ThemedText>
         )}
       </View>
-      <View style={[styles.colorDot, { backgroundColor: item.mainColor }]} />
     </View>
   );
 };
@@ -67,15 +66,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     opacity: 0.5,
     fontStyle: 'italic',
-  },
-  colorDot: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
+  }
 });

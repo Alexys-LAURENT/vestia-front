@@ -57,7 +57,7 @@ export function usePaginatedFetch<T>(
       setError(null);
 
       const url = buildUrl(pageNum);
-      const response = await api.get<T[]>(url) as PaginatedResponse<T[]>;
+      const response = await api.get<PaginatedResponse<T[]>>(url);
       
       const newData = response.data.data;
       const meta = response.data.meta;
@@ -71,6 +71,8 @@ export function usePaginatedFetch<T>(
       setHasMore(meta.currentPage < meta.lastPage);
       setPage(pageNum);
     } catch (err) {
+      console.log(err);
+      
       const message = err instanceof FetchApiError ? err.message : 'Erreur de chargement';
       setError(message);
     } finally {
