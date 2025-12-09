@@ -341,6 +341,8 @@ export function ImageGallerySheet({
               visible={isAlbumSelectorVisible}
               onSelectAlbum={handleSelectAlbum}
               selectedAlbumId={selectedAlbum?.id}
+              allowedMediaTypes={allowedMediaTypes}
+              excludedExtensions={excludedExtensions}
             />
 
             {!isAlbumSelectorVisible &&

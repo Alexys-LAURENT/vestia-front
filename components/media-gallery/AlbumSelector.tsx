@@ -14,12 +14,18 @@ import React, {
 } from "react";
 import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { MediaType } from "./types/media-gallery.types";
+import { isAssetExcluded, mapMediaTypeToLibraryType } from "./utils/media-gallery.utils";
 
 interface AlbumSelectorProps {
   visible: boolean;
   onClose?: () => void;
   onSelectAlbum: (album: MediaLibrary.Album | null) => void;
   selectedAlbumId?: string;
+  /** Type de média autorisé ("photo" | "video" | "all") */
+  allowedMediaTypes?: MediaType;
+  /** Extensions de fichiers à exclure (ex: ["gif", "webp"]) */
+  excludedExtensions?: string[];
 }
 interface AlbumWithThumbnail extends Album {
   thumbnailUri?: string;
@@ -31,7 +37,7 @@ export interface AlbumSelectorRef {
 }
 
 export const AlbumSelector = forwardRef<AlbumSelectorRef, AlbumSelectorProps>(
-  ({ visible, onClose, onSelectAlbum, selectedAlbumId }, ref) => {
+  ({ visible, onClose, onSelectAlbum, selectedAlbumId, allowedMediaTypes = "all", excludedExtensions }, ref) => {
     const [albums, setAlbums] = useState<AlbumWithThumbnail[]>([]);
     const [recentThumbnail, setRecentThumbnail] = useState<{
       uri: string;
@@ -44,26 +50,92 @@ export const AlbumSelector = forwardRef<AlbumSelectorRef, AlbumSelectorProps>(
 
     const loadAlbums = useCallback(async () => {
       try {
-        // Charger le dernier média pour "Récents"
-        const recentAssets = await MediaLibrary.getAssetsAsync({
-          first: 1,
-          sortBy: [[MediaLibrary.SortBy.modificationTime, false]],
-          mediaType: [
-            MediaLibrary.MediaType.photo,
-            MediaLibrary.MediaType.video,
-          ],
-        });
+        // Déterminer les types de médias à charger
+        const mediaTypes = mapMediaTypeToLibraryType(allowedMediaTypes);
 
-        if (recentAssets.assets.length > 0) {
-          const recentAsset = recentAssets.assets[0];
+        // Fonction pour trouver le premier asset valide (non exclu)
+        const findFirstValidAsset = async (
+          album?: MediaLibrary.Album,
+        ): Promise<MediaLibrary.Asset | null> => {
+          let endCursor: string | undefined = undefined;
+          let hasNextPage = true;
+
+          while (hasNextPage) {
+            const assets = await MediaLibrary.getAssetsAsync({
+              album: album || undefined,
+              first: 20, // Charger par lots pour trouver un asset valide
+              after: endCursor,
+              sortBy: [[MediaLibrary.SortBy.modificationTime, false]],
+              mediaType: mediaTypes,
+            });
+
+            // Trouver le premier asset qui n'est pas exclu
+            for (const asset of assets.assets) {
+              if (!isAssetExcluded(asset, excludedExtensions)) {
+                return asset;
+              }
+            }
+
+            hasNextPage = assets.hasNextPage;
+            endCursor = assets.endCursor;
+          }
+
+          return null;
+        };
+
+        // Fonction pour compter les assets valides d'un album
+        const countValidAssets = async (
+          album?: MediaLibrary.Album,
+        ): Promise<number> => {
+          let count = 0;
+          let endCursor: string | undefined = undefined;
+          let hasNextPage = true;
+
+          while (hasNextPage) {
+            const assets = await MediaLibrary.getAssetsAsync({
+              album: album || undefined,
+              first: 100,
+              after: endCursor,
+              sortBy: [[MediaLibrary.SortBy.modificationTime, false]],
+              mediaType: mediaTypes,
+            });
+
+            for (const asset of assets.assets) {
+              if (!isAssetExcluded(asset, excludedExtensions)) {
+                count++;
+              }
+            }
+
+            hasNextPage = assets.hasNextPage;
+            endCursor = assets.endCursor;
+          }
+
+          return count;
+        };
+
+        // Charger le premier média valide pour "Récents"
+        const recentAsset = await findFirstValidAsset();
+
+        if (recentAsset) {
           let thumbnailUri = recentAsset.uri;
           let isVideo = false;
+
+          // Sur iOS, les URIs ph:// ne sont pas supportées directement
+          // Il faut obtenir l'URI locale pour les photos et vidéos
+          try {
+            const assetInfo = await MediaLibrary.getAssetInfoAsync(recentAsset);
+            if (assetInfo.localUri) {
+              thumbnailUri = assetInfo.localUri;
+            }
+          } catch {
+            console.error("Error getting local URI for Récents");
+          }
 
           if (recentAsset.mediaType === MediaLibrary.MediaType.video) {
             isVideo = true;
             try {
               const result = await VideoThumbnails.getThumbnailAsync(
-                recentAsset.uri,
+                thumbnailUri,
                 { time: 0 },
               );
               thumbnailUri = result.uri;
@@ -73,48 +145,62 @@ export const AlbumSelector = forwardRef<AlbumSelectorRef, AlbumSelectorProps>(
           }
 
           setRecentThumbnail({ uri: thumbnailUri, isVideo });
+        } else {
+          setRecentThumbnail(null);
         }
 
         const fetchedAlbums = await MediaLibrary.getAlbumsAsync({
           includeSmartAlbums: true,
         });
 
+        // Filtrer l'album "Recents" du système sur iOS pour éviter le doublon
+        // car on a déjà notre propre entrée "Récents" (null)
+        const filteredSystemAlbums = fetchedAlbums.filter(
+          (album) => album.title.toLowerCase() !== "recents",
+        );
+
         // Charger la vignette pour chaque album
         const albumsWithThumbnails = await Promise.all(
-          fetchedAlbums.map(async (album) => {
+          filteredSystemAlbums.map(async (album) => {
             try {
-              const assets = await MediaLibrary.getAssetsAsync({
-                album,
-                first: 1,
-                sortBy: [[MediaLibrary.SortBy.modificationTime, false]], // false = descendant
-                mediaType: [
-                  MediaLibrary.MediaType.photo,
-                  MediaLibrary.MediaType.video,
-                ],
-              });
-
-              const firstAsset = assets.assets[0];
+              // Trouver le premier asset valide (non exclu) de l'album
+              const firstAsset = await findFirstValidAsset(album);
 
               if (!firstAsset) {
-                console.log(`No assets found in album ${album.title}`);
+                // Pas d'asset valide dans cet album après filtrage
                 return album;
               }
 
+              // Compter les assets valides pour afficher le bon nombre
+              const validAssetCount = await countValidAssets(album);
+
               let thumbnailUri = firstAsset.uri;
               let isVideo = false;
+
+              // Sur iOS, les URIs ph:// ne sont pas supportées directement
+              // Il faut obtenir l'URI locale pour les photos et vidéos
+              try {
+                const assetInfo = await MediaLibrary.getAssetInfoAsync(firstAsset);
+                if (assetInfo.localUri) {
+                  thumbnailUri = assetInfo.localUri;
+                }
+              } catch {
+                console.error(`[Album: ${album.title}] Error getting local URI`);
+              }
 
               // Si c'est une vidéo, générer une vignette
               if (firstAsset.mediaType === MediaLibrary.MediaType.video) {
                 isVideo = true;
                 try {
                   const result = await VideoThumbnails.getThumbnailAsync(
-                    firstAsset.uri,
+                    thumbnailUri,
                     {
                       time: 0,
                     },
                   );
                   thumbnailUri = result.uri;
-                } catch {
+                } catch(error) {
+                  console.log(error);
                   console.error(
                     `[Album: ${album.title}] Error generating video thumbnail`,
                   );
@@ -126,6 +212,7 @@ export const AlbumSelector = forwardRef<AlbumSelectorRef, AlbumSelectorProps>(
                 ...album,
                 thumbnailUri,
                 isVideo,
+                assetCount: validAssetCount, // Override avec le compte filtré
               };
             } catch {
               console.error(`Error loading thumbnail for album ${album.id}:`);
@@ -144,7 +231,7 @@ export const AlbumSelector = forwardRef<AlbumSelectorRef, AlbumSelectorProps>(
       } catch {
         console.error("Error loading albums");
       }
-    }, []);
+    }, [allowedMediaTypes, excludedExtensions]);
 
     // Load albums on mount
     useEffect(() => {
