@@ -1,6 +1,6 @@
 import { ITEM_FORMALITIES, ITEM_SEASONS, ITEM_TYPES } from '@/constants/file_types';
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Image,
   ScrollView,
@@ -20,23 +20,7 @@ export const ItemForm = ({
   tintColor,
   textColor,
 }: ItemFormProps) => {
-  const [tagInput, setTagInput] = useState('');
   const imageUri = selectedImage?.croppedUri || selectedImage?.localUri || selectedImage?.uri;
-
-  const addTag = () => {
-    const trimmedTag = tagInput.trim();
-    if (trimmedTag && !formState.tags.includes(trimmedTag)) {
-      onUpdateField('tags', [...formState.tags, trimmedTag]);
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    onUpdateField(
-      'tags',
-      formState.tags.filter((tag) => tag !== tagToRemove)
-    );
-  };
 
   return (
     <BottomSheetScrollView style={styles.container}>
@@ -65,7 +49,7 @@ export const ItemForm = ({
           placeholder="Description du vêtement"
           placeholderTextColor={`${textColor}80`}
           multiline
-          numberOfLines={3}
+          numberOfLines={5}
         />
       </FormField>
 
@@ -113,39 +97,6 @@ export const ItemForm = ({
           placeholder="Ex: Bleu marine"
           placeholderTextColor={`${textColor}80`}
         />
-      </FormField>
-
-      {/* Tags */}
-      <FormField label="Tags" textColor={textColor}>
-        <View style={styles.tagInputContainer}>
-          <BottomSheetTextInput
-            style={[styles.tagInput, { color: textColor, borderColor: tintColor }]}
-            value={tagInput}
-            onChangeText={setTagInput}
-            placeholder="Ajouter un tag"
-            placeholderTextColor={`${textColor}80`}
-            onSubmitEditing={addTag}
-          />
-          <TouchableOpacity
-            style={[styles.addTagButton, { backgroundColor: tintColor }]}
-            onPress={addTag}
-          >
-            <Text style={styles.addTagButtonText}>+</Text>
-          </TouchableOpacity>
-        </View>
-        {formState.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {formState.tags.map((tag) => (
-              <TouchableOpacity
-                key={tag}
-                style={[styles.tag, { backgroundColor: `${tintColor}30` }]}
-                onPress={() => removeTag(tag)}
-              >
-                <Text style={[styles.tagText, { color: tintColor }]}>{tag} ×</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
       </FormField>
 
       {/* Marque */}
@@ -275,7 +226,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   textArea: {
-    height: 80,
+    height: 180,
     textAlignVertical: 'top',
   },
   chipContainer: {

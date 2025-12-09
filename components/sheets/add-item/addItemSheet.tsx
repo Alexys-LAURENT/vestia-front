@@ -5,10 +5,6 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useImagePicker } from '../media-gallery';
-import type { MediaAssetWithUri } from '../media-gallery/types/media-gallery.types';
-import { ThemedText } from '../themed-text';
-import { Sheet, useSheetRef } from './Sheet';
 import {
   AnalyzingStep,
   ImageSelector,
@@ -16,7 +12,11 @@ import {
   ItemForm,
   SubmittingStep,
   type AddItemStep,
-} from './add-item';
+} from '.';
+import { useImagePicker } from '../../media-gallery';
+import type { MediaAssetWithUri } from '../../media-gallery/types/media-gallery.types';
+import { ThemedText } from '../../themed-text';
+import { Sheet, useSheetRef } from '../Sheet';
 
 interface AddItemSheetProps {
   isOpen: boolean;
@@ -147,7 +147,7 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
           />
         );
       case 'analyzing':
-        return <AnalyzingStep tintColor={tintColor} textColor={textColor} />;
+        return <AnalyzingStep selectedImage={selectedImage} tintColor={tintColor} textColor={textColor} />;
       case 'form':
         return (
           <ItemForm
@@ -172,8 +172,9 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
       snapPoints={['100%']}
       enableDynamicSizing={false}
       handleComponent={null}
+      enableContentPanningGesture={false}
     >
-      <BottomSheetScrollView style={[styles.contentContainer, { backgroundColor }]}>
+      <BottomSheetScrollView style={[styles.contentContainer, { backgroundColor }]} bounces={false}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.header}>
             <TouchableOpacity onPress={handleClose}>

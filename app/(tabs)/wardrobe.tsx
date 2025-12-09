@@ -1,4 +1,4 @@
-import AddItemSheet from '@/components/sheets/addItemSheet';
+import AddItemSheet from '@/components/sheets/add-item/addItemSheet';
 import { ThemedText } from '@/components/themed-text';
 import { FloatingActionButton } from '@/components/wardrobe/FloatingActionButton';
 import { ItemCard } from '@/components/wardrobe/ItemCard';

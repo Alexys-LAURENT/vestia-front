@@ -34,7 +34,6 @@ export const ImageSelector = ({
         } as unknown as Blob);
   
         const response = await api.postFormData<ItemAnalysisResponse>('/items/analyse', formData);
-        console.log(response);
   
         // Si on a eu une réponse positive de l'api
         if("success" in response && response.success === true) {

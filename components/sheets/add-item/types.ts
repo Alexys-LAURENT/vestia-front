@@ -22,7 +22,9 @@ export interface ImageSelectorProps extends StepProps {
 }
 
 // Props pour AnalyzingStep
-export interface AnalyzingStepProps extends StepProps {}
+export interface AnalyzingStepProps extends StepProps {
+  selectedImage: MediaAssetWithUri | null;
+}
 
 // Props pour ItemForm
 export interface ItemFormProps extends StepProps {
@@ -34,7 +36,7 @@ export interface ItemFormProps extends StepProps {
 }
 
 // Props pour SubmittingStep
-export interface SubmittingStepProps extends StepProps {}
+export type SubmittingStepProps = StepProps
 
 // État initial du formulaire
 export const initialFormState: ItemFormState = {
