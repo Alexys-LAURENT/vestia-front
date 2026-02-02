@@ -7,17 +7,22 @@ import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-nat
 
 interface ItemCardProps {
   item: Item;
+  customOnPress?: (item:Item) => void;
 }
 
 const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2;
 
-export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
+export const ItemCard: React.FC<ItemCardProps> = ({ item , customOnPress}) => {
   const router = useRouter();
   const cardBackground = useThemeColor({}, 'background');
   const borderColor = useThemeColor({}, 'icon');
   const API_URL = process.env.EXPO_PUBLIC_API_URL
 
   const handlePress = () => {
+    if(customOnPress){
+      customOnPress(item);
+      return;
+    }
     router.push(`/item/${item.idItem}`);
   };
 

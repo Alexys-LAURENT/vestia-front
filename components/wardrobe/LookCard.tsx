@@ -2,8 +2,9 @@ import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Look } from '@/types/entities';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface LookCardProps {
   look: Look;
@@ -15,11 +16,17 @@ export const LookCard: React.FC<LookCardProps> = ({ look }) => {
   const cardBackground = useThemeColor({}, 'background');
   const borderColor = useThemeColor({}, 'icon');
   const primaryColor = useThemeColor({}, 'tint');
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const router = useRouter();
 
   const previewItems = look.items.slice(0, 4);
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBackground, borderColor }]}>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: cardBackground, borderColor }]}
+      onPress={() => router.push(`/look/${look.idLook}`)}
+      activeOpacity={0.7}
+    >
       {look.avatarImageUrl ? (
         <Image
           source={{ uri: look.avatarImageUrl }}
@@ -31,7 +38,7 @@ export const LookCard: React.FC<LookCardProps> = ({ look }) => {
           {previewItems.map((item, index) => (
             <Image
               key={item.idItem}
-              source={{ uri: item.imageUrl }}
+              source={{ uri: `${API_URL}${item.imageUrl}` }}
               style={styles.gridImage}
               resizeMode="cover"
             />
@@ -55,7 +62,7 @@ export const LookCard: React.FC<LookCardProps> = ({ look }) => {
           <Ionicons name="sparkles" size={12} color="#fff" />
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 

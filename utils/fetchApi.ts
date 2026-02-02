@@ -111,11 +111,13 @@ export const fetchApi = async <T>(
 
     // Vérifier si c'est une erreur API
     if (isApiError(data)) {
+      
       throw new FetchApiError(response.status, data);
     }
 
     return data;
   } catch (error) {
+    
     if (error instanceof FetchApiError) {
       throw error;
     }

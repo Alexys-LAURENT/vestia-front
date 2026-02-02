@@ -28,3 +28,14 @@ export type Look = {
   updatedAt: string | null
   items: Item[]
 }
+
+export type PlannedOutfit = {
+  idPlannedOutfit: number
+  idLook: number
+  idUser: number
+  plannedDate: string // ISO date string
+  notes: string | null
+  createdAt: string
+  updatedAt: string | null
+  look: Look
+}

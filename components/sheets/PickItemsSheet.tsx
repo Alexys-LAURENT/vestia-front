@@ -1,32 +1,58 @@
-import AddItemSheet from '@/components/sheets/add-item/addItemSheet';
-import { CreateManualLookSheet } from '@/components/sheets/CreateManualLookSheet';
 import { ThemedText } from '@/components/themed-text';
-import { FloatingActionButton } from '@/components/wardrobe/FloatingActionButton';
 import { ItemCard } from '@/components/wardrobe/ItemCard';
 import { ItemFilters } from '@/components/wardrobe/ItemFilters';
-import { LookCard } from '@/components/wardrobe/LookCard';
-import { WardrobeTabs, type WardrobeTab } from '@/components/wardrobe/WardrobeTabs';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePaginatedFetch } from '@/hooks/usePaginatedFetch';
-import type { Item, Look } from '@/types/entities';
-import React, { useCallback, useMemo, useState } from 'react';
+import type { Item } from '@/types/entities';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Sheet, useSheetRef } from './Sheet';
 
-const WardrobeScreen = () => {
+interface EditItemSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  callback?: (items:Item[]) => void;
+  initialSelectedItems?: Item[];
+}
+
+const PickItemsSheet = ({ isOpen, onClose, callback, initialSelectedItems = [] }: EditItemSheetProps) => {
+  const sheetRef = useSheetRef();
+  useEffect(() => {
+    if (isOpen) {
+      sheetRef.current?.present();
+      // Réinitialiser avec les items actuellement sélectionnés
+      setPickedItems(initialSelectedItems);
+    } else {
+      sheetRef.current?.dismiss();
+    }
+  }, [isOpen, sheetRef, initialSelectedItems]);
+
+
   const backgroundColor = useThemeColor({}, 'background');
   const primaryColor = useThemeColor({}, 'tint');
 
-  const [activeTab, setActiveTab] = useState<WardrobeTab>('items');
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState<string | undefined>();
+  const [pickedItems, setPickedItems] = useState<Item[]>(initialSelectedItems);
+
+  const handleToggleItem = useCallback((item: Item) => {
+    setPickedItems((prevPickedItems) => {
+      if (prevPickedItems.find((i) => i.idItem === item.idItem)) {
+        return prevPickedItems.filter((i) => i.idItem !== item.idItem);
+      } else {
+        return [...prevPickedItems, item];
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if(callback){
+      callback(pickedItems);
+    }
+  }, [pickedItems, callback]);
 
   // Debounce search
   const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  // Sheets
-  const [isAddItemSheetOpen, setIsAddItemSheetOpen] = useState(false)
-  const [isCreateLookSheetOpen, setIsCreateLookSheetOpen] = useState(false)
   
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -46,41 +72,31 @@ const WardrobeScreen = () => {
     isLoading: isLoadingItems,
     isLoadingMore: isLoadingMoreItems,
     error: itemsError,
-    hasMore: hasMoreItems,
     refresh: refreshItems,
     loadMore: loadMoreItems,
-  } = usePaginatedFetch<Item>('/items', itemsParams, { enabled: activeTab === 'items' });
+  } = usePaginatedFetch<Item>('/items', itemsParams, { enabled: true });
   
-  // Fetch looks
-  const {
-    data: looks,
-    isLoading: isLoadingLooks,
-    isLoadingMore: isLoadingMoreLooks,
-    error: looksError,
-    hasMore: hasMoreLooks,
-    refresh: refreshLooks,
-    loadMore: loadMoreLooks,
-  } = usePaginatedFetch<Look>('/looks', {}, { enabled: activeTab === 'looks' });
-
-  const handleTabChange = useCallback((tab: WardrobeTab) => {
-    setActiveTab(tab);
-  }, []);
-
-  const handleFabPress = useCallback(() => {
-    if(activeTab === 'items') {
-      setIsAddItemSheetOpen(true);
-    }else {
-      setIsCreateLookSheetOpen(true);
-    }
-  }, [activeTab]);
 
   const renderItemCard = useCallback(({ item }: { item: Item }) => (
-    <ItemCard item={item} />
-  ), []);
-
-  const renderLookCard = useCallback(({ item }: { item: Look }) => (
-    <LookCard look={item} />
-  ), []);
+    <View className='relative'>
+    <ItemCard item={item} customOnPress={handleToggleItem} />
+    {pickedItems.find((i) => i.idItem === item.idItem) && (
+      <View style={{
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: primaryColor,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+        <ThemedText style={{ color: 'white', fontWeight: 'bold' }}>✓</ThemedText>
+      </View>
+    )}
+    </View>
+  ), [handleToggleItem, pickedItems, primaryColor]);
 
   const renderFooter = useCallback((isLoadingMore: boolean) => {
     if (!isLoadingMore) return null;
@@ -109,29 +125,30 @@ const WardrobeScreen = () => {
     return (
       <View style={styles.centered}>
         <ThemedText style={styles.emptyText}>
-          {activeTab === 'items' ? 'Aucun vêtement trouvé' : 'Aucune tenue trouvée'}
+          Aucun vêtement trouvé
         </ThemedText>
       </View>
     );
-  }, [activeTab, primaryColor]);
+  }, [primaryColor]);
 
   return (
-    <>
-    <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
+    <Sheet
+      ref={sheetRef}
+      onDismiss={onClose}
+      snapPoints={['90%']}
+      enableDynamicSizing={false}
+      stackBehavior="push"
+    >
+    <View style={[styles.container, { backgroundColor }]} >
       <ThemedText style={styles.title}>Ma Garde-robe</ThemedText>
       
-      <WardrobeTabs activeTab={activeTab} onTabChange={handleTabChange} />
-      
-      {activeTab === 'items' && (
         <ItemFilters
           search={search}
           onSearchChange={setSearch}
           selectedType={selectedType}
           onTypeChange={setSelectedType}
         />
-      )}
 
-      {activeTab === 'items' ? (
         <FlatList
           data={items}
           renderItem={renderItemCard}
@@ -147,43 +164,17 @@ const WardrobeScreen = () => {
             <RefreshControl refreshing={false} onRefresh={refreshItems} tintColor={primaryColor} />
           }
         />
-      ) : (
-        <FlatList
-          data={looks}
-          renderItem={renderLookCard}
-          keyExtractor={(item) => String(item.idLook)}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.listContent}
-          onEndReached={loadMoreLooks}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={() => renderFooter(isLoadingMoreLooks)}
-          ListEmptyComponent={() => renderEmpty(isLoadingLooks, looksError)}
-          refreshControl={
-            <RefreshControl refreshing={false} onRefresh={refreshLooks} tintColor={primaryColor} />
-          }
-        />
-      )}
-
-      <FloatingActionButton onPress={handleFabPress} />
-    </SafeAreaView>
-    <AddItemSheet
-    isOpen={isAddItemSheetOpen}
-    onClose={() => setIsAddItemSheetOpen(false)}
-    onSuccess={refreshItems}
-    />
-    <CreateManualLookSheet
-    isOpen={isCreateLookSheetOpen}
-    onClose={() => setIsCreateLookSheetOpen(false)}
-    onSuccess={refreshLooks}
-    />
-    </>
+      
+    </View>
+    </Sheet>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
+    gap: 12,
   },
   title: {
     fontSize: 28,
@@ -219,4 +210,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WardrobeScreen;
+export default PickItemsSheet;
