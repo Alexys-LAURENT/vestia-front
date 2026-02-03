@@ -3,7 +3,6 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Header } from '@/components/ui/header';
 import { Spacing, Typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Item } from '@/types/entities';
 import { fetchApi } from '@/utils/fetchApi';
@@ -27,7 +26,6 @@ export default function ItemDetailsScreen() {
   const textTertiary = useThemeColor({}, 'textTertiary');
   const borderColor = useThemeColor({}, 'border');
   const tintColor = useThemeColor({}, 'tint');
-  const colorScheme = useColorScheme() ?? 'light';
 
   // Animations
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -65,7 +63,7 @@ export default function ItemDetailsScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [fadeAnim, id, slideAnim]);
 
   useEffect(() => {
     if (id) {

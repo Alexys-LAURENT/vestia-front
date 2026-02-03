@@ -54,7 +54,7 @@ const WardrobeScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [activeTab]);
+  }, [activeTab, fadeAnim]);
 
   // Fetch items
   const itemsParams = useMemo(
@@ -70,7 +70,6 @@ const WardrobeScreen = () => {
     isLoading: isLoadingItems,
     isLoadingMore: isLoadingMoreItems,
     error: itemsError,
-    hasMore: hasMoreItems,
     refresh: refreshItems,
     loadMore: loadMoreItems,
   } = usePaginatedFetch<Item>('/items', itemsParams, { enabled: activeTab === 'items' });
@@ -81,7 +80,6 @@ const WardrobeScreen = () => {
     isLoading: isLoadingLooks,
     isLoadingMore: isLoadingMoreLooks,
     error: looksError,
-    hasMore: hasMoreLooks,
     refresh: refreshLooks,
     loadMore: loadMoreLooks,
   } = usePaginatedFetch<Look>('/looks', {}, { enabled: activeTab === 'looks' });

@@ -1,27 +1,27 @@
 import { LookCard } from '@/components/LookCard'
+import { LookMenuSheetButton } from '@/components/lookPage/LookMenuSheetButton'
 import { PlanLookSheet } from '@/components/sheets/PlanLookSheet'
 import { ThemedText } from '@/components/themed-text'
+import { ThemedView } from '@/components/themed-view'
+import { Header } from '@/components/ui/header'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { usePlannedOutfits } from '@/hooks/usePlannedOutfits'
 import type { Look, PlannedOutfit } from '@/types/entities'
 import type { SuccessResponse } from '@/types/requests'
 import { api, FetchApiError } from '@/utils/fetchApi'
 import { Ionicons } from '@expo/vector-icons'
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
 
 export default function LookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -35,17 +35,11 @@ export default function LookDetailScreen() {
   const [look, setLook] = useState<Look | null>(null)
   const [plannedOutfits, setPlannedOutfits] = useState<PlannedOutfit[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [showPlanSheet, setShowPlanSheet] = useState(false)
 
   const { createPlannedOutfit, getPlannedOutfits, deletePlannedOutfit } = usePlannedOutfits()
 
-  useEffect(() => {
-    loadLook()
-    loadPlannedOutfits()
-  }, [id])
-
-  const loadLook = async () => {
+  const loadLook = useCallback(async () => {
     if (!id) return
 
     setIsLoading(true)
@@ -62,9 +56,9 @@ export default function LookDetailScreen() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [id, router])
 
-  const loadPlannedOutfits = async () => {
+  const loadPlannedOutfits = useCallback(async () => {
     if (!id) return
 
     try {
@@ -75,40 +69,12 @@ export default function LookDetailScreen() {
     } catch (error) {
       console.error('Error loading planned outfits:', error)
     }
-  }
+  }, [id, getPlannedOutfits])
 
-  const handleDelete = useCallback(() => {
-    Alert.alert(
-      'Supprimer la tenue',
-      'Êtes-vous sûr de vouloir supprimer cette tenue ?',
-      [
-        {
-          text: 'Annuler',
-          style: 'cancel',
-        },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: async () => {
-            setIsDeleting(true)
-            try {
-              await api.delete(`/looks/${id}`)
-              Alert.alert('Succès', 'Tenue supprimée')
-              router.back()
-            } catch (error) {
-              if (error instanceof FetchApiError) {
-                Alert.alert('Erreur', error.message)
-              } else {
-                Alert.alert('Erreur', 'Impossible de supprimer la tenue')
-              }
-            } finally {
-              setIsDeleting(false)
-            }
-          },
-        },
-      ]
-    )
-  }, [id, router])
+  useEffect(() => {
+    loadLook()
+    loadPlannedOutfits()
+  }, [loadLook, loadPlannedOutfits])
 
   const handlePlan = useCallback(() => {
     setShowPlanSheet(true)
@@ -127,7 +93,7 @@ export default function LookDetailScreen() {
         Alert.alert('Erreur', 'Impossible de planifier la tenue')
       }
     },
-    [look, createPlannedOutfit]
+    [look, createPlannedOutfit, loadPlannedOutfits]
   )
 
   const handleDeletePlannedOutfit = useCallback(
@@ -156,16 +122,14 @@ export default function LookDetailScreen() {
         ]
       )
     },
-    [deletePlannedOutfit]
+    [deletePlannedOutfit, loadPlannedOutfits]
   )
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={tintColor} />
-        </View>
-      </SafeAreaView>
+      <ThemedView style={styles.centered}>
+        <ActivityIndicator size="large" color={tintColor} />
+      </ThemedView>
     )
   }
 
@@ -175,43 +139,16 @@ export default function LookDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: borderColor }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={textColor} />
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <ThemedText style={styles.headerTitle} numberOfLines={1}>
-              {look.event || 'Tenue sans événement'}
-            </ThemedText>
-            {look.isAiGenerated && (
-              <View style={[styles.aiBadgeSmall, { backgroundColor: tintColor }]}>
-                <Ionicons name="sparkles" size={12} color="#fff" />
-              </View>
-            )}
-          </View>
-          <View style={styles.headerActions}>
-            <TouchableOpacity
-              style={[styles.headerButton, { backgroundColor: tintColor }]}
-              onPress={handlePlan}
-            >
-              <Ionicons name="calendar-outline" size={18} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.headerButton, { backgroundColor: '#ff4444' }]}
-              onPress={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Ionicons name="trash-outline" size={18} color="#fff" />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
+      <View style={[styles.container, { backgroundColor }]}>
+        <Header
+          title={look.event || 'Tenue sans événement'}
+          actionComponent={
+            <LookMenuSheetButton
+              lookId={look.idLook}
+              onPlanPress={handlePlan}
+            />
+          }
+        />
 
         <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
           {/* Look Preview */}
@@ -314,7 +251,7 @@ export default function LookDetailScreen() {
             ))}
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </View>
 
       {/* Plan Sheet */}
       <PlanLookSheet
@@ -334,46 +271,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    gap: 12,
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerCenter: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    flexShrink: 1,
-  },
-  aiBadgeSmall: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  headerButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   content: {
     flex: 1,

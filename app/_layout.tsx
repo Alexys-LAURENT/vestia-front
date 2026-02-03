@@ -50,6 +50,7 @@ function RootNavigator() {
         <Stack.Protected guard={!!session}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="item/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="look/[id]" options={{ headerShown: false }} />
         </Stack.Protected>
         {/* Public routes */}
         <Stack.Protected guard={!session}>
