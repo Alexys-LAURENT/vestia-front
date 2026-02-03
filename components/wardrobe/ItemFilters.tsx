@@ -1,9 +1,11 @@
 import { ThemedText } from '@/components/themed-text';
 import { ITEM_TYPES } from '@/constants/file_types';
+import { Radius, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Animated, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface ItemFiltersProps {
   search: string;
@@ -18,103 +20,189 @@ export const ItemFilters: React.FC<ItemFiltersProps> = ({
   selectedType,
   onTypeChange,
 }) => {
-  const backgroundColor = useThemeColor({}, 'background');
+  const backgroundColor = useThemeColor({}, 'backgroundSecondary');
   const textColor = useThemeColor({}, 'text');
-  const borderColor = useThemeColor({}, 'icon');
-  const primaryColor = useThemeColor({}, 'tint');
+  const textTertiary = useThemeColor({}, 'textTertiary');
+  const borderColor = useThemeColor({}, 'border');
+  const tintColor = useThemeColor({}, 'tint');
+  const colorScheme = useColorScheme() ?? 'light';
+  const shadows = Shadows[colorScheme];
+
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <View style={styles.container}>
-      <View style={[styles.searchContainer, { borderColor }]}>
-        <Ionicons name="search" size={20} color={borderColor} style={styles.searchIcon} />
+      {/* Search Bar */}
+      <View
+        style={[
+          styles.searchContainer,
+          {
+            backgroundColor,
+            borderColor: isFocused ? tintColor : borderColor,
+            ...shadows.sm,
+          },
+        ]}
+      >
+        <Ionicons
+          name="search-outline"
+          size={20}
+          color={textTertiary}
+          style={styles.searchIcon}
+        />
         <TextInput
-          style={[styles.searchInput, { color: textColor }]}
+          style={[
+            styles.searchInput,
+            {
+              color: textColor,
+              fontSize: Typography.size.body,
+            },
+          ]}
           placeholder="Rechercher..."
-          placeholderTextColor={borderColor}
+          placeholderTextColor={textTertiary}
           value={search}
           onChangeText={onSearchChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
         {search.length > 0 && (
-          <TouchableOpacity onPress={() => onSearchChange('')}>
-            <Ionicons name="close-circle" size={20} color={borderColor} />
+          <TouchableOpacity
+            onPress={() => onSearchChange('')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="close-circle" size={20} color={textTertiary} />
           </TouchableOpacity>
         )}
       </View>
-      
+
+      {/* Category Chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.typesContainer}
+        contentContainerStyle={styles.chipsContainer}
       >
-        <TouchableOpacity
-          style={[
-            styles.typeChip,
-            { borderColor },
-            !selectedType && { backgroundColor: primaryColor, borderColor: primaryColor },
-          ]}
+        <CategoryChip
+          label="Tous"
+          isActive={!selectedType}
           onPress={() => onTypeChange(undefined)}
-        >
-          <ThemedText style={[styles.typeText, !selectedType && styles.activeTypeText]}>
-            Tous
-          </ThemedText>
-        </TouchableOpacity>
+          tintColor={tintColor}
+          borderColor={borderColor}
+          textColor={textColor}
+          textTertiary={textTertiary}
+          backgroundColor={backgroundColor}
+        />
         {ITEM_TYPES.map((type) => (
-          <TouchableOpacity
+          <CategoryChip
             key={type}
-            style={[
-              styles.typeChip,
-              { borderColor },
-              selectedType === type && { backgroundColor: primaryColor, borderColor: primaryColor },
-            ]}
+            label={type}
+            isActive={selectedType === type}
             onPress={() => onTypeChange(selectedType === type ? undefined : type)}
-          >
-            <ThemedText style={[styles.typeText, selectedType === type && styles.activeTypeText]}>
-              {type}
-            </ThemedText>
-          </TouchableOpacity>
+            tintColor={tintColor}
+            borderColor={borderColor}
+            textColor={textColor}
+            textTertiary={textTertiary}
+            backgroundColor={backgroundColor}
+          />
         ))}
       </ScrollView>
     </View>
   );
 };
 
+// Separate component for category chips
+const CategoryChip: React.FC<{
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+  tintColor: string;
+  borderColor: string;
+  textColor: string;
+  textTertiary: string;
+  backgroundColor: string;
+}> = ({ label, isActive, onPress, tintColor, borderColor, textColor, textTertiary, backgroundColor }) => {
+  const scaleAnim = React.useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 50,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={0.9}
+    >
+      <Animated.View
+        style={[
+          styles.chip,
+          {
+            backgroundColor: isActive ? tintColor : backgroundColor,
+            borderColor: isActive ? tintColor : borderColor,
+            transform: [{ scale: scaleAnim }],
+          },
+        ]}
+      >
+        <ThemedText
+          style={[
+            styles.chipText,
+            {
+              color: isActive ? backgroundColor : textColor,
+              fontSize: Typography.size.caption,
+              fontWeight: isActive ? Typography.weight.semibold : Typography.weight.medium,
+            },
+          ]}
+        >
+          {label}
+        </ThemedText>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
-    gap: 12,
-    paddingBottom: 12,
+    gap: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 10,
-    marginHorizontal: 16,
-    paddingHorizontal: 12,
-    height: 44,
+    borderRadius: Radius.full,
+    marginHorizontal: Spacing.base,
+    paddingHorizontal: Spacing.base,
+    height: 48,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: Spacing.sm,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontWeight: Typography.weight.regular,
   },
-  typesContainer: {
-    paddingHorizontal: 16,
-    gap: 8,
+  chipsContainer: {
+    paddingHorizontal: Spacing.base,
+    gap: Spacing.sm,
   },
-  typeChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+  chip: {
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
     borderWidth: 1,
-    marginRight: 8,
   },
-  typeText: {
-    fontSize: 14,
-  },
-  activeTypeText: {
-    color: '#fff',
-    fontWeight: '600',
+  chipText: {
+    letterSpacing: 0.3,
   },
 });

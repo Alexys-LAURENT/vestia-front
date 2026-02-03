@@ -3,8 +3,7 @@ import { useThemeColor } from '@/hooks/use-theme-color'
 import { usePlannedOutfits } from '@/hooks/usePlannedOutfits'
 import type { PlannedOutfit } from '@/types/entities'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -132,33 +131,6 @@ export default function CalendarScreen() {
     const scrollPosition = todayIndex * itemWidth - SCREEN_WIDTH / 2 + itemWidth / 2
     scrollViewRef.current?.scrollTo({ x: scrollPosition, animated: true })
   }, [])
-
-  const scrollToDate = useCallback((date: Date) => {
-    const today = new Date()
-    const diffTime = date.getTime() - today.getTime()
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
-    const dateIndex = 15 + diffDays // 15 is today's index
-
-    if (dateIndex >= 0 && dateIndex < 30) {
-      const itemWidth = 48 + 4
-      const scrollPosition = dateIndex * itemWidth - SCREEN_WIDTH / 2 + itemWidth / 2
-      scrollViewRef.current?.scrollTo({ x: scrollPosition, animated: true })
-    }
-  }, [])
-
-  const goToPreviousDay = useCallback(() => {
-    const newDate = new Date(selectedDate)
-    newDate.setDate(newDate.getDate() - 1)
-    setSelectedDate(newDate)
-    scrollToDate(newDate)
-  }, [selectedDate, scrollToDate])
-
-  const goToNextDay = useCallback(() => {
-    const newDate = new Date(selectedDate)
-    newDate.setDate(newDate.getDate() + 1)
-    setSelectedDate(newDate)
-    scrollToDate(newDate)
-  }, [selectedDate, scrollToDate])
 
   const renderDayItem = (date: Date) => {
     const isSelected = isSameDay(date, selectedDate)
@@ -333,7 +305,7 @@ export default function CalendarScreen() {
           paddingHorizontal: 32,
         }}
       >
-        Créez et planifiez vos tenues depuis l'onglet Créer
+        Créez et planifiez vos tenues depuis l&apos;onglet Créer
       </ThemedText>
     </View>
   )
@@ -367,7 +339,7 @@ export default function CalendarScreen() {
             disabled={isToday(selectedDate)}
           >
             <ThemedText style={{ fontSize: 14, fontWeight: '600', color: '#fff' }}>
-              Aujourd'hui
+              Aujourd&apos;hui
             </ThemedText>
           </TouchableOpacity>
         </View>

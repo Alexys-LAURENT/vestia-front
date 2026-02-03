@@ -33,8 +33,8 @@ export const Header: React.FC<HeaderProps> = ({ title, onBack, actionComponent }
         styles.container, 
         { 
           backgroundColor, 
-          paddingTop: insets.top,
-          height: 44 + insets.top
+          paddingTop: insets.top + 8,
+          height: 44 + insets.top + 8
         }
       ]}
     >
@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
     textAlign: 'center',
+    lineHeight: 22,
   },
   actionContainer: {
     width: 40,

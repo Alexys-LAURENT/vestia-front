@@ -2,13 +2,18 @@ import { ItemMenuSheetButton } from '@/components/itemPage/ItemMenuSheetButton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Header } from '@/components/ui/header';
+import { Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Item } from '@/types/entities';
 import { fetchApi } from '@/utils/fetchApi';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { SuccessResponse } from '../../types/requests';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const IMAGE_HEIGHT = SCREEN_WIDTH * 1.25; // Ratio 4:5 pour aesthetic fashion
 
 export default function ItemDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -17,8 +22,16 @@ export default function ItemDetailsScreen() {
   const [error, setError] = useState<string | null>(null);
   
   const backgroundColor = useThemeColor({}, 'background');
-  const iconColor = useThemeColor({}, 'icon');
+  const textColor = useThemeColor({}, 'text');
+  const textSecondary = useThemeColor({}, 'textSecondary');
+  const textTertiary = useThemeColor({}, 'textTertiary');
+  const borderColor = useThemeColor({}, 'border');
   const tintColor = useThemeColor({}, 'tint');
+  const colorScheme = useColorScheme() ?? 'light';
+
+  // Animations
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const loadItem = React.useCallback(async () => {
     try {
@@ -31,8 +44,23 @@ export default function ItemDetailsScreen() {
         throw new Error("message" in data ? data.message : "Erreur inconnue");
       }
       setItem(data.data);
+      
+      // Animate in after data loads
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
     } catch (err) {
-      setError('Impossible de charger les détails du vêtement');
+      setError('Unable to load item details');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -47,7 +75,6 @@ export default function ItemDetailsScreen() {
 
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
   
-  // Construction sécurisée de l'URL de l'image
   const imageUrl = React.useMemo(() => {
     if (!item?.imageUrl || !API_URL) return null;
     try {
@@ -68,7 +95,7 @@ export default function ItemDetailsScreen() {
   if (error || !item) {
     return (
       <ThemedView style={styles.centered}>
-        <ThemedText>{error || 'Vêtement introuvable'}</ThemedText>
+        <ThemedText style={{ color: textColor }}>{error || 'Item not found'}</ThemedText>
       </ThemedView>
     );
   }
@@ -79,61 +106,168 @@ export default function ItemDetailsScreen() {
         title={item.name} 
         actionComponent={<ItemMenuSheetButton itemId={item.idItem} onEditSuccess={loadItem} />}
       />
-      <ScrollView style={styles.scrollView}>
+      
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero Image */}
         {imageUrl && (
-          <Image
-            source={{ uri: imageUrl }}
-            style={styles.image}
-            resizeMode="cover"
-          />
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: imageUrl }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </View>
         )}
         
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <ThemedText type="title" style={styles.title}>{item.name}</ThemedText>
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <ThemedText
+              style={[
+                styles.itemName,
+                {
+                  color: textColor,
+                  fontSize: Typography.size.title,
+                  fontWeight: Typography.weight.bold,
+                  fontFamily: Typography.family.display,
+                },
+              ]}
+            >
+              {item.name}
+            </ThemedText>
+            
             {item.brand && (
-              <ThemedText style={[styles.brand, { color: iconColor }]}>
+              <ThemedText
+                style={[
+                  styles.brand,
+                  {
+                    color: textSecondary,
+                    fontSize: Typography.size.subheading,
+                    fontWeight: Typography.weight.regular,
+                    fontStyle: 'italic',
+                  },
+                ]}
+              >
                 {item.brand}
               </ThemedText>
             )}
           </View>
 
+          {/* Divider */}
+          <View style={[styles.divider, { backgroundColor: borderColor }]} />
+
+          {/* Details Section */}
           <View style={styles.section}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>Détails</ThemedText>
+            <ThemedText
+              style={[
+                styles.sectionTitle,
+                {
+                  color: textColor,
+                  fontSize: Typography.size.micro,
+                  fontWeight: Typography.weight.semibold,
+                },
+              ]}
+            >
+              DÉTAILS
+            </ThemedText>
             
-            <View style={styles.row}>
-              <ThemedText style={styles.label}>Type :</ThemedText>
-              <ThemedText style={styles.value}>{item.type}</ThemedText>
-            </View>
-
-            <View style={styles.row}>
-              <ThemedText style={styles.label}>Saison :</ThemedText>
-              <ThemedText style={styles.value}>{item.season}</ThemedText>
-            </View>
-
-            <View style={styles.row}>
-              <ThemedText style={styles.label}>Formalité :</ThemedText>
-              <ThemedText style={styles.value}>{item.formality}</ThemedText>
-            </View>
-
-            <View style={styles.row}>
-              <ThemedText style={styles.label}>Couleur principale :</ThemedText>
-              <ThemedText style={styles.value}>{item.mainColor}</ThemedText>
+            <View style={styles.detailsGrid}>
+              <DetailRow label="TYPE" value={item.type} textColor={textSecondary} textTertiary={textTertiary} />
+              <DetailRow label="SAISON" value={item.season} textColor={textSecondary} textTertiary={textTertiary} />
+              <DetailRow label="FORMALITÉ" value={item.formality} textColor={textSecondary} textTertiary={textTertiary} />
+              <DetailRow label="COULEUR" value={item.mainColor} textColor={textSecondary} textTertiary={textTertiary} />
             </View>
           </View>
 
-          {item.description ? (
-            <View style={styles.section}>
-              <ThemedText type="subtitle" style={styles.sectionTitle}>Description</ThemedText>
-              <ThemedText style={styles.description}>{item.description}</ThemedText>
-            </View>
-          ) : null}
+          {/* Description Section */}
+          {item.description && (
+            <>
+              <View style={[styles.divider, { backgroundColor: borderColor }]} />
+              
+              <View style={styles.section}>
+                <ThemedText
+                  style={[
+                    styles.sectionTitle,
+                    {
+                      color: textColor,
+                      fontSize: Typography.size.micro,
+                      fontWeight: Typography.weight.semibold,
+                    },
+                  ]}
+                >
+                  DESCRIPTION
+                </ThemedText>
+                
+                <ThemedText
+                  style={[
+                    styles.description,
+                    {
+                      color: textSecondary,
+                      fontSize: Typography.size.body,
+                      fontWeight: Typography.weight.regular,
+                      lineHeight: Typography.size.body * Typography.lineHeight.relaxed,
+                    },
+                  ]}
+                >
+                  {item.description}
+                </ThemedText>
+              </View>
+            </>
+          )}
 
-        </View>
+          {/* Bottom Spacing */}
+          <View style={{ height: Spacing['3xl'] }} />
+        </Animated.View>
       </ScrollView>
     </View>
   );
 }
+
+// Helper component for detail rows
+const DetailRow: React.FC<{ label: string; value: string; textColor: string; textTertiary: string }> = ({
+  label,
+  value,
+  textColor,
+  textTertiary,
+}) => (
+  <View style={styles.detailRow}>
+    <ThemedText
+      style={[
+        styles.detailLabel,
+        {
+          color: textTertiary,
+          fontSize: Typography.size.caption,
+          fontWeight: Typography.weight.medium,
+        },
+      ]}
+    >
+      {label}
+    </ThemedText>
+    <ThemedText
+      style={[
+        styles.detailValue,
+        {
+          color: textColor,
+          fontSize: Typography.size.body,
+          fontWeight: Typography.weight.regular,
+        },
+      ]}
+    >
+      {value}
+    </ThemedText>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -147,60 +281,58 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  imageContainer: {
+    width: '100%',
+    height: IMAGE_HEIGHT,
+    backgroundColor: '#F5F5F5',
+  },
   image: {
     width: '100%',
-    height: 400,
+    height: '100%',
   },
   content: {
-    padding: 20,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xl,
   },
-  header: {
-    marginBottom: 24,
+  titleSection: {
+    marginBottom: Spacing.lg,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
+  itemName: {
+    letterSpacing: Typography.letterSpacing.tight,
+    marginBottom: Spacing.xs,
+    lineHeight: Typography.size.title * 1.2,
   },
   brand: {
-    fontSize: 18,
-    opacity: 0.7,
+    letterSpacing: -0.3,
+  },
+  divider: {
+    height: 1,
+    marginVertical: Spacing.lg,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: Spacing.base,
   },
   sectionTitle: {
-    marginBottom: 12,
+    letterSpacing: Typography.letterSpacing.wide,
+    marginBottom: Spacing.base,
+    textTransform: 'uppercase',
   },
-  row: {
+  detailsGrid: {
+    gap: Spacing.md,
+  },
+  detailRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  label: {
-    width: 100,
-    fontWeight: '600',
-    opacity: 0.8,
+  detailLabel: {
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
-  value: {
-    flex: 1,
+  detailValue: {
+    letterSpacing: -0.2,
   },
   description: {
-    lineHeight: 24,
-    opacity: 0.9,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  tag: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  tagText: {
-    fontSize: 14,
+    letterSpacing: -0.2,
   },
 });

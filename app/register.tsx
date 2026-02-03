@@ -1,20 +1,25 @@
+import { ThemedText } from '@/components/themed-text';
+import { Input } from '@/components/ui/input';
 import { PASSWORD_REGEX } from '@/constants/auth';
-import { Colors } from '@/constants/theme';
+import { Animation, Colors, Radius, Spacing, Typography } from '@/constants/theme';
 import { useSession } from '@/contexts/SessionContext';
 import { useBehavior } from '@/hooks/use-behavior';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { api, FetchApiError } from '@/utils/fetchApi';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View
+    ActivityIndicator,
+    Animated,
+    KeyboardAvoidingView,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function Register() {
@@ -35,6 +40,12 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Animations
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
   // Validation en temps réel
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
@@ -43,6 +54,41 @@ export default function Register() {
 
   // Ref pour le debounce
   const usernameDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Entrance animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: Animation.duration.slow,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 40,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  // Shake animation for errors
+  useEffect(() => {
+    if (error) {
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 10, duration: 100, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -10, duration: 100, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 10, duration: 100, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 100, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [error]);
 
   const updateField = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -280,8 +326,8 @@ export default function Register() {
   };
 
   const styles = createStyles(colors);
-
-  const behaviour = useBehavior()
+  const behaviour = useBehavior();
+  const tintColor = useThemeColor({}, 'tint');
 
   return (
     <KeyboardAvoidingView
@@ -291,19 +337,40 @@ export default function Register() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Créer un compte</Text>
-          <Text style={styles.subtitle}>Rejoignez Vestia dès maintenant</Text>
-        </View>
+        
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [
+                { translateY: slideAnim },
+                { scale: scaleAnim },
+              ],
+            },
+          ]}
+        >
+          {/* Logo & Header */}
+          <View style={styles.header}>
+            <Text style={styles.logo}>VESTIA</Text>
+            <View style={styles.divider} />
+            <Text style={styles.subtitle}>Create your account</Text>
+          </View>
 
-        <View style={styles.form}>
+          {/* Form */}
+          <Animated.View
+            style={[
+              styles.form,
+              {
+                transform: [{ translateX: shakeAnim }],
+              },
+            ]}
+          >
           <View style={styles.row}>
-            <View style={[styles.inputContainer, styles.halfInput]}>
-              <Text style={styles.label}>Prénom</Text>
-              <TextInput
-                style={styles.input}
+            <View style={styles.halfInput}>
+              <Input
+                label="Prénom"
                 placeholder="John"
-                placeholderTextColor={colors.icon}
                 value={formData.firstName}
                 onChangeText={v => updateField('firstName', v)}
                 autoComplete="given-name"
@@ -311,12 +378,10 @@ export default function Register() {
               />
             </View>
 
-            <View style={[styles.inputContainer, styles.halfInput]}>
-              <Text style={styles.label}>Nom</Text>
-              <TextInput
-                style={styles.input}
+            <View style={styles.halfInput}>
+              <Input
+                label="Nom"
                 placeholder="Doe"
-                placeholderTextColor={colors.icon}
                 value={formData.lastName}
                 onChangeText={v => updateField('lastName', v)}
                 autoComplete="family-name"
@@ -325,139 +390,120 @@ export default function Register() {
             </View>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Nom d&apos;utilisateur</Text>
-            <View style={[
-              styles.inputWithStatus,
-              usernameStatus === 'available' && styles.inputSuccess,
-              usernameStatus === 'taken' && styles.inputError,
-            ]}>
-              <TextInput
-                style={styles.inputInner}
-                placeholder="johndoe"
-                placeholderTextColor={colors.icon}
-                value={formData.username}
-                onChangeText={handleUsernameChange}
-                autoCapitalize="none"
-                autoComplete="username"
-                editable={!loading}
-              />
-              <View style={styles.statusContainer}>
-                {getUsernameStatusIcon()}
-              </View>
+          <View style={styles.usernameContainer}>
+            <Input
+              label="Nom d'utilisateur"
+              placeholder="johndoe"
+              value={formData.username}
+              onChangeText={handleUsernameChange}
+              autoCapitalize="none"
+              autoComplete="username"
+              editable={!loading}
+              error={usernameError || undefined}
+            />
+            <View style={styles.usernameStatus}>
+              {getUsernameStatusIcon()}
             </View>
-            {usernameError && <Text style={styles.fieldError}>{usernameError}</Text>}
             {usernameStatus === 'available' && (
-              <Text style={styles.fieldSuccess}>Nom d&apos;utilisateur disponible</Text>
+              <Text style={styles.fieldSuccess}>✓ Nom d&apos;utilisateur disponible</Text>
             )}
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Date de naissance</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="15/01/1990"
-              placeholderTextColor={colors.icon}
-              value={formData.birthDate}
-              onChangeText={handleBirthDateChange}
-              keyboardType="number-pad"
-              maxLength={10}
-              editable={!loading}
-            />
-          </View>
+          <Input
+            label="Date de naissance"
+            placeholder="15/01/1990"
+            value={formData.birthDate}
+            onChangeText={handleBirthDateChange}
+            keyboardType="number-pad"
+            maxLength={10}
+            editable={!loading}
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="john@example.com"
-              placeholderTextColor={colors.icon}
-              value={formData.email}
-              onChangeText={v => updateField('email', v)}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              editable={!loading}
-            />
-          </View>
+          <Input
+            label="Email"
+            placeholder="john@example.com"
+            value={formData.email}
+            onChangeText={v => updateField('email', v)}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            editable={!loading}
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Mot de passe</Text>
-            <View style={[
-              styles.passwordContainer,
-              passwordError && styles.inputError,
-              formData.password.length > 0 && !passwordError && styles.inputSuccess,
-            ]}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="••••••••"
-                placeholderTextColor={colors.icon}
-                value={formData.password}
-                onChangeText={handlePasswordChange}
-                secureTextEntry={!showPassword}
-                autoComplete="new-password"
-                editable={!loading}
+          <View style={styles.passwordWrapper}>
+            <Input
+              label="Mot de passe"
+              placeholder="••••••••"
+              value={formData.password}
+              onChangeText={handlePasswordChange}
+              secureTextEntry={!showPassword}
+              autoComplete="new-password"
+              editable={!loading}
+              error={passwordError || undefined}
+            />
+            <Pressable
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={22}
+                color={colors.icon}
               />
-              <Pressable
-                onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeButton}>
-                <Text style={styles.eyeText}>{showPassword ? '🙈' : '👁️'}</Text>
-              </Pressable>
-            </View>
-            {passwordError ? (
-              <Text style={styles.fieldError}>{passwordError}</Text>
-            ) : (
+            </Pressable>
+            {!passwordError && formData.password.length === 0 && (
               <Text style={styles.hint}>
                 Min. 6 caractères, 1 majuscule, 1 chiffre
               </Text>
             )}
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirmer le mot de passe</Text>
-            <TextInput
-              style={[
-                styles.input,
-                confirmPasswordError && styles.inputError,
-                formData.confirmPassword.length > 0 && !confirmPasswordError && formData.password === formData.confirmPassword && styles.inputSuccess,
-              ]}
-              placeholder="••••••••"
-              placeholderTextColor={colors.icon}
-              value={formData.confirmPassword}
-              onChangeText={handleConfirmPasswordChange}
-              secureTextEntry={!showPassword}
-              autoComplete="new-password"
-              editable={!loading}
-            />
-            {confirmPasswordError && (
-              <Text style={styles.fieldError}>{confirmPasswordError}</Text>
-            )}
-          </View>
+          <Input
+            label="Confirmer le mot de passe"
+            placeholder="••••••••"
+            value={formData.confirmPassword}
+            onChangeText={handleConfirmPasswordChange}
+            secureTextEntry={!showPassword}
+            autoComplete="new-password"
+            editable={!loading}
+            error={confirmPasswordError || undefined}
+          />
 
           {error && (
-            <View style={styles.errorContainer}>
+            <Animated.View style={styles.errorContainer}>
+              <Ionicons name="alert-circle-outline" size={18} color="#DC2626" />
               <Text style={styles.errorText}>{error}</Text>
-            </View>
+            </Animated.View>
           )}
 
-          <Pressable
-            style={[styles.button, (loading || !isFormValid()) && styles.buttonDisabled]}
+          <TouchableOpacity
+            className="flex-row items-center justify-center flex-1 py-3 rounded-xl"
+            style={{ backgroundColor: tintColor, opacity: loading || !isFormValid() ? 0.6 : 1 }}
             onPress={handleRegister}
-            disabled={loading || !isFormValid()}>
+            disabled={loading || !isFormValid()}
+          >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.buttonText}>Créer mon compte</Text>
+              <ThemedText style={{ color: '#fff', marginLeft: 8, fontWeight: '600', fontSize: 16 }}>
+                Créer mon compte
+              </ThemedText>
             )}
-          </Pressable>
+          </TouchableOpacity>
 
+          {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Déjà un compte ?</Text>
-            <Pressable onPress={() => router.back()}>
+            <Pressable
+              onPress={() => router.push('/sign-in')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Text style={styles.linkText}>Se connecter</Text>
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
+      </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -471,77 +517,58 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     scrollContent: {
       flexGrow: 1,
-      padding: 24,
-      paddingTop: 60,
+      justifyContent: 'center',
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: Spacing['4xl'],
+    },
+    content: {
+      width: '100%',
+      maxWidth: 400,
+      alignSelf: 'center',
     },
     header: {
       alignItems: 'center',
-      marginBottom: 32,
+      marginBottom: Spacing['3xl'],
     },
-    title: {
-      fontSize: 32,
-      fontWeight: 'bold',
+    logo: {
+      fontFamily: Typography.family.display,
+      fontSize: Typography.size.hero,
+      fontWeight: Typography.weight.black,
       color: colors.text,
-      marginBottom: 8,
+      letterSpacing: Typography.letterSpacing.tight,
+      marginBottom: Spacing.base,
+    },
+    divider: {
+      width: 60,
+      height: 2,
+      backgroundColor: colors.tint,
+      marginBottom: Spacing.lg,
     },
     subtitle: {
-      fontSize: 16,
-      color: colors.icon,
+      fontSize: Typography.size.body,
+      fontWeight: Typography.weight.regular,
+      color: colors.textTertiary,
+      letterSpacing: Typography.letterSpacing.wide,
+      textTransform: 'uppercase',
     },
     form: {
-      gap: 16,
+      gap: Spacing.lg,
     },
     row: {
       flexDirection: 'row',
-      gap: 12,
-    },
-    inputContainer: {
-      gap: 6,
+      gap: Spacing.base,
     },
     halfInput: {
       flex: 1,
     },
-    label: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
+    usernameContainer: {
+      position: 'relative',
     },
-    hint: {
-      fontSize: 12,
-      color: colors.icon,
-      marginTop: 4,
-    },
-    input: {
-      height: 48,
-      borderWidth: 1,
-      borderColor: colors.icon,
-      borderRadius: 10,
-      paddingHorizontal: 14,
-      fontSize: 16,
-      color: colors.text,
-      backgroundColor: colors.background,
-    },
-    inputWithStatus: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.icon,
-      borderRadius: 10,
-      backgroundColor: colors.background,
-    },
-    inputInner: {
-      flex: 1,
-      height: 48,
-      paddingHorizontal: 14,
-      fontSize: 16,
-      color: colors.text,
-    },
-    statusContainer: {
-      paddingHorizontal: 12,
-      height: 48,
-      justifyContent: 'center',
-      minWidth: 40,
-      alignItems: 'center',
+    usernameStatus: {
+      position: 'absolute',
+      right: Spacing.base,
+      top: Spacing.xl + Spacing.sm,
+      zIndex: 10,
     },
     statusIcon: {
       fontSize: 18,
@@ -551,90 +578,59 @@ const createStyles = (colors: typeof Colors.light) =>
     errorIcon: {
       color: '#dc2626',
     },
-    inputSuccess: {
-      borderColor: '#22c55e',
-      borderWidth: 1.5,
-    },
-    inputError: {
-      borderColor: '#dc2626',
-      borderWidth: 1.5,
-    },
-    fieldError: {
-      fontSize: 12,
-      color: '#dc2626',
-      marginTop: 4,
-    },
     fieldSuccess: {
-      fontSize: 12,
+      fontSize: Typography.size.caption,
       color: '#22c55e',
-      marginTop: 4,
+      marginTop: Spacing.xs,
+      fontWeight: Typography.weight.medium,
     },
-    passwordContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.icon,
-      borderRadius: 10,
-      backgroundColor: colors.background,
-    },
-    passwordInput: {
-      flex: 1,
-      height: 48,
-      paddingHorizontal: 14,
-      fontSize: 16,
-      color: colors.text,
+    passwordWrapper: {
+      position: 'relative',
     },
     eyeButton: {
-      paddingHorizontal: 14,
-      height: 48,
-      justifyContent: 'center',
+      position: 'absolute',
+      right: Spacing.base,
+      top: Spacing.xl + Spacing.sm,
+      zIndex: 10,
     },
-    eyeText: {
-      fontSize: 18,
+    hint: {
+      fontSize: Typography.size.caption,
+      color: colors.textTertiary,
+      marginTop: Spacing.xs,
     },
     errorContainer: {
-      backgroundColor: '#fee2e2',
-      padding: 12,
-      borderRadius: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      paddingHorizontal: Spacing.base,
+      paddingVertical: Spacing.sm,
+      backgroundColor: '#FEE2E2',
+      borderRadius: Radius.sm,
       borderWidth: 1,
-      borderColor: '#fecaca',
+      borderColor: '#FECACA',
     },
     errorText: {
-      color: '#dc2626',
-      fontSize: 14,
-      textAlign: 'center',
-    },
-    button: {
-      height: 52,
-      backgroundColor: colors.tint,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 8,
-    },
-    buttonDisabled: {
-      opacity: 0.6,
-    },
-    buttonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: '600',
+      flex: 1,
+      color: '#DC2626',
+      fontSize: Typography.size.caption,
+      fontWeight: Typography.weight.medium,
     },
     footer: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 4,
-      marginTop: 16,
-      paddingBottom: 24,
+      gap: Spacing.xs,
+      marginTop: Spacing.xl,
     },
     footerText: {
-      color: colors.icon,
-      fontSize: 14,
+      color: colors.textSecondary,
+      fontSize: Typography.size.bodySmall,
+      fontWeight: Typography.weight.regular,
     },
     linkText: {
       color: colors.tint,
-      fontSize: 14,
-      fontWeight: '600',
+      fontSize: Typography.size.bodySmall,
+      fontWeight: Typography.weight.semibold,
+      textDecorationLine: 'underline',
     },
   });

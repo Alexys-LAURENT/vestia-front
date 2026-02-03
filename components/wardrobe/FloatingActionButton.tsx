@@ -1,22 +1,57 @@
+import { Shadows, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { Animated, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface FloatingActionButtonProps {
   onPress: () => void;
 }
 
 export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPress }) => {
-  const primaryColor = useThemeColor({}, 'tint');
+  const tintColor = useThemeColor({}, 'tint');
+  const backgroundColor = useThemeColor({}, 'backgroundSecondary');
+  const colorScheme = useColorScheme() ?? 'light';
+  const shadows = Shadows[colorScheme];
+
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.92,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 50,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
 
   return (
     <TouchableOpacity
-      style={[styles.button, { backgroundColor: primaryColor }]}
       onPress={onPress}
-      activeOpacity={0.8}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={0.9}
     >
-      <Ionicons name="add" size={28} color="#fff" />
+      <Animated.View
+        style={[
+          styles.button,
+          {
+            backgroundColor: tintColor,
+            ...shadows.xl,
+            transform: [{ scale: scaleAnim }],
+          },
+        ]}
+      >
+        <Ionicons name="add" size={32} color={backgroundColor} />
+      </Animated.View>
     </TouchableOpacity>
   );
 };
@@ -24,17 +59,12 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPr
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    bottom: Spacing.xl,
+    right: Spacing.xl,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
   },
 });

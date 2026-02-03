@@ -1,7 +1,8 @@
 import { ThemedText } from '@/components/themed-text';
+import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, LayoutChangeEvent, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export type WardrobeTab = 'items' | 'looks';
 
@@ -11,68 +12,113 @@ interface WardrobeTabsProps {
 }
 
 export const WardrobeTabs: React.FC<WardrobeTabsProps> = ({ activeTab, onTabChange }) => {
-  const primaryColor = useThemeColor({}, 'tint');
-  const backgroundColor = useThemeColor({}, 'background');
-  const borderColor = useThemeColor({}, 'icon');
+  const textColor = useThemeColor({}, 'text');
+  const textTertiary = useThemeColor({}, 'textTertiary');
+  const tintColor = useThemeColor({}, 'tint');
+  const borderColor = useThemeColor({}, 'border');
+
+  const indicatorPosition = useRef(new Animated.Value(0)).current;
+  const [tabWidth, setTabWidth] = React.useState(0);
+
+  useEffect(() => {
+    Animated.spring(indicatorPosition, {
+      toValue: activeTab === 'items' ? 0 : 1,
+      tension: 50,
+      friction: 8,
+      useNativeDriver: false,
+    }).start();
+  }, [activeTab]);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    setTabWidth(width / 2);
+  };
+
+  const indicatorTranslate = indicatorPosition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, tabWidth],
+  });
 
   return (
-    <View style={[styles.container, { borderColor }]}>
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          activeTab === 'items' && { backgroundColor: primaryColor },
-        ]}
-        onPress={() => onTabChange('items')}
-      >
-        <ThemedText
+    <View style={styles.container} onLayout={handleLayout}>
+      <View style={[styles.tabsWrapper, { borderBottomColor: borderColor }]}>
+        {/* Animated Indicator */}
+        <Animated.View
           style={[
-            styles.tabText,
-            activeTab === 'items' && styles.activeTabText,
+            styles.indicator,
+            {
+              backgroundColor: tintColor,
+              transform: [{ translateX: indicatorTranslate }],
+              width: tabWidth,
+            },
           ]}
+        />
+
+        {/* Tabs */}
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => onTabChange('items')}
+          activeOpacity={0.7}
         >
-          Vêtements
-        </ThemedText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          activeTab === 'looks' && { backgroundColor: primaryColor },
-        ]}
-        onPress={() => onTabChange('looks')}
-      >
-        <ThemedText
-          style={[
-            styles.tabText,
-            activeTab === 'looks' && styles.activeTabText,
-          ]}
+          <ThemedText
+            style={[
+              styles.tabText,
+              {
+                color: activeTab === 'items' ? textColor : textTertiary,
+                fontSize: Typography.size.body,
+                fontWeight: activeTab === 'items' ? Typography.weight.semibold : Typography.weight.regular,
+              },
+            ]}
+          >
+            Vêtements
+          </ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => onTabChange('looks')}
+          activeOpacity={0.7}
         >
-          Tenues
-        </ThemedText>
-      </TouchableOpacity>
+          <ThemedText
+            style={[
+              styles.tabText,
+              {
+                color: activeTab === 'looks' ? textColor : textTertiary,
+                fontSize: Typography.size.body,
+                fontWeight: activeTab === 'looks' ? Typography.weight.semibold : Typography.weight.regular,
+              },
+            ]}
+          >
+            Tenues
+          </ThemedText>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: Spacing.base,
+    marginBottom: Spacing.sm,
+  },
+  tabsWrapper: {
     flexDirection: 'row',
-    borderRadius: 12,
-    borderWidth: 1,
-    overflow: 'hidden',
-    marginHorizontal: 16,
-    marginVertical: 12,
+    position: 'relative',
+    borderBottomWidth: 1,
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: Spacing.md,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   tabText: {
-    fontSize: 16,
-    fontWeight: '500',
+    letterSpacing: -0.2,
   },
-  activeTabText: {
-    color: '#fff',
-    fontWeight: '600',
+  indicator: {
+    position: 'absolute',
+    bottom: -1,
+    height: 2,
   },
 });

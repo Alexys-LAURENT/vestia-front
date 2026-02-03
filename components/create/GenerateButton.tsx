@@ -29,7 +29,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
       ) : (
         <>
           <Ionicons name="sparkles" size={20} color="#fff" />
-          <ThemedText className="ml-2 text-white font-semibold text-base">
+          <ThemedText style={{ color: '#fff', marginLeft: 8, fontWeight: '600', fontSize: 16 }}>
             Générer
           </ThemedText>
         </>

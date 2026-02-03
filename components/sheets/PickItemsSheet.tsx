@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginHorizontal: 16,
     paddingTop: 8,
+    fontFamily: 'Georgia',
   },
   row: {
     justifyContent: 'space-between',

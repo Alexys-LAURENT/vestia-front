@@ -63,7 +63,7 @@ export const GeneratedLookDisplay: React.FC<GeneratedLookDisplayProps> = ({
             onPress={onChoose}
           >
             <Ionicons name="checkmark-circle" size={22} color="#fff" />
-            <ThemedText className="ml-2 text-white font-semibold">Je choisis ça !</ThemedText>
+            <ThemedText lightColor="#fff" darkColor="#fff" className="ml-2 font-semibold">Je choisis ça !</ThemedText>
           </TouchableOpacity>
         </View>
       ) : (

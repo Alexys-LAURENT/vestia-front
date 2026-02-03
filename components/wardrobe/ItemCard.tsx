@@ -1,4 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
+import { Radius, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Item } from '@/types/entities';
 import { useRouter } from 'expo-router';
@@ -7,19 +9,24 @@ import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-nat
 
 interface ItemCardProps {
   item: Item;
-  customOnPress?: (item:Item) => void;
+  customOnPress?: (item: Item) => void;
 }
 
-const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2;
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const CARD_WIDTH = (SCREEN_WIDTH - Spacing.base * 3) / 2; // 2 columns with padding
 
-export const ItemCard: React.FC<ItemCardProps> = ({ item , customOnPress}) => {
+export const ItemCard: React.FC<ItemCardProps> = ({ item, customOnPress }) => {
   const router = useRouter();
-  const cardBackground = useThemeColor({}, 'background');
-  const borderColor = useThemeColor({}, 'icon');
-  const API_URL = process.env.EXPO_PUBLIC_API_URL
+  const cardBackground = useThemeColor({}, 'backgroundSecondary');
+  const textColor = useThemeColor({}, 'text');
+  const textSecondary = useThemeColor({}, 'textSecondary');
+  const textTertiary = useThemeColor({}, 'textTertiary');
+  const colorScheme = useColorScheme() ?? 'light';
+  const shadows = Shadows[colorScheme];
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   const handlePress = () => {
-    if(customOnPress){
+    if (customOnPress) {
       customOnPress(item);
       return;
     }
@@ -27,26 +34,72 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item , customOnPress}) => {
   };
 
   return (
-    <TouchableOpacity 
-      style={[styles.card, { backgroundColor: cardBackground, borderColor }]}
+    <TouchableOpacity
+      style={[
+        styles.card,
+        {
+          backgroundColor: cardBackground,
+          ...shadows.md,
+        },
+      ]}
       onPress={handlePress}
-      activeOpacity={0.7}
+      activeOpacity={0.9}
     >
-      <Image
-        source={{ uri: `${API_URL}${item.imageUrl}` }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      {/* Image */}
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: `${API_URL}${item.imageUrl}` }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        
+        {/* Overlay gradient for better text readability */}
+        <View style={styles.imageOverlay} />
+      </View>
+
+      {/* Content */}
       <View style={styles.content}>
-        <ThemedText style={styles.name} numberOfLines={1}>
+        <ThemedText
+          style={[
+            styles.name,
+            {
+              color: textColor,
+              fontSize: Typography.size.bodySmall,
+              fontWeight: Typography.weight.semibold,
+            },
+          ]}
+          numberOfLines={1}
+        >
           {item.name}
         </ThemedText>
-        <ThemedText style={styles.type} numberOfLines={1}>
+        
+        <ThemedText
+          style={[
+            styles.type,
+            {
+              color: textTertiary,
+              fontSize: Typography.size.caption,
+              fontWeight: Typography.weight.regular,
+            },
+          ]}
+          numberOfLines={1}
+        >
           {item.type}
         </ThemedText>
+        
         {item.brand && (
-          <ThemedText style={styles.brand} numberOfLines={1}>
-            {item.brand}
+          <ThemedText
+            style={[
+              styles.brand,
+              {
+                color: textSecondary,
+                fontSize: Typography.size.micro,
+                fontWeight: Typography.weight.medium,
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {item.brand.toUpperCase()}
           </ThemedText>
         )}
       </View>
@@ -57,30 +110,39 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item , customOnPress}) => {
 const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: Spacing.base,
+  },
+  imageContainer: {
+    width: '100%',
+    height: CARD_WIDTH * 1.2, // Ratio 5:6 for fashion aesthetic
+    position: 'relative',
   },
   image: {
     width: '100%',
-    height: CARD_WIDTH,
+    height: '100%',
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '30%',
+    backgroundColor: 'transparent',
   },
   content: {
-    padding: 10,
-    gap: 2,
+    padding: Spacing.md,
+    gap: Spacing.xs,
   },
   name: {
-    fontSize: 14,
-    fontWeight: '600',
+    letterSpacing: -0.2,
   },
   type: {
-    fontSize: 12,
-    opacity: 0.7,
+    letterSpacing: 0.2,
   },
   brand: {
-    fontSize: 11,
-    opacity: 0.5,
-    fontStyle: 'italic',
-  }
+    letterSpacing: 0.5,
+    marginTop: Spacing.xs / 2,
+  },
 });

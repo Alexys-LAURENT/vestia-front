@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/themed-text'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
-import { TouchableOpacity, View, ActivityIndicator } from 'react-native'
+import { ActivityIndicator, TouchableOpacity, View } from 'react-native'
 
 interface ActionButtonsProps {
   onSave: () => void
@@ -34,7 +34,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         ) : (
           <>
             <Ionicons name="save-outline" size={20} color="#fff" />
-            <ThemedText className="ml-2 text-white font-semibold text-sm">
+            <ThemedText lightColor="#fff" darkColor="#fff" className="ml-2 font-semibold text-sm">
               Enregistrer
             </ThemedText>
           </>
