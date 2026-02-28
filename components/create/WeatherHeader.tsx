@@ -32,8 +32,9 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   const backgroundColor = useThemeColor({}, 'background');
   const backgroundSecondary = useThemeColor({}, 'backgroundSecondary');
   const borderColor = useThemeColor({}, 'border');
-  const colorScheme = useColorScheme() ?? 'light';
-  const shadows = Shadows[colorScheme];
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const shadows = Shadows[theme];
 
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -146,7 +147,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
                       styles.modalTitle,
                       {
                         color: textColor,
-                        fontSize: Typography.size.h3,
+                        fontSize: Typography.size.heading,
                         fontWeight: Typography.weight.semibold,
                       },
                     ]}

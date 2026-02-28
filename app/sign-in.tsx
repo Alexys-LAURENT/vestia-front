@@ -22,8 +22,9 @@ import {
 
 export default function SignIn() {
   const { signIn } = useSession();
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = Colors[colorScheme];
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

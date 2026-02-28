@@ -148,10 +148,10 @@ Root layout wraps app in these providers (order matters):
 
 ## Project Configuration
 
-- **Expo SDK**: v54
-- **React**: 19.1.0
-- **React Native**: 0.81.5
-- **New Architecture**: Enabled (`newArchEnabled: true`)
+- **Expo SDK**: v55
+- **React**: 19.2.0
+- **React Native**: 0.83.2
+- **New Architecture**: Enabled by default in SDK 55
 - **Typed Routes**: Enabled in experiments
 - **React Compiler**: Enabled in experiments
 - **Bundle Identifier**: com.anonymous.vestia

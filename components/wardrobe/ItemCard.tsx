@@ -21,8 +21,9 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, customOnPress }) => {
   const textColor = useThemeColor({}, 'text');
   const textSecondary = useThemeColor({}, 'textSecondary');
   const textTertiary = useThemeColor({}, 'textTertiary');
-  const colorScheme = useColorScheme() ?? 'light';
-  const shadows = Shadows[colorScheme];
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const shadows = Shadows[theme];
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   const handlePress = () => {

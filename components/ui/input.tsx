@@ -94,7 +94,7 @@ export const Input: React.FC<InputProps> = ({
               color: textColor,
               fontSize: Typography.size.body,
             },
-            icon && styles.inputWithIcon,
+            icon ? styles.inputWithIcon : undefined,
           ]}
           placeholderTextColor={placeholderColor}
           onFocus={handleFocus}

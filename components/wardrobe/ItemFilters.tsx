@@ -25,8 +25,9 @@ export const ItemFilters: React.FC<ItemFiltersProps> = ({
   const textTertiary = useThemeColor({}, 'textTertiary');
   const borderColor = useThemeColor({}, 'border');
   const tintColor = useThemeColor({}, 'tint');
-  const colorScheme = useColorScheme() ?? 'light';
-  const shadows = Shadows[colorScheme];
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const shadows = Shadows[theme];
 
   const [isFocused, setIsFocused] = useState(false);
 

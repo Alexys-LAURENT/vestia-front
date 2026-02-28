@@ -22,8 +22,9 @@ export const LookCard: React.FC<LookCardProps> = ({ look }) => {
   const textSecondary = useThemeColor({}, 'textSecondary');
   const textTertiary = useThemeColor({}, 'textTertiary');
   const tintColor = useThemeColor({}, 'tint');
-  const colorScheme = useColorScheme() ?? 'light';
-  const shadows = Shadows[colorScheme];
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const shadows = Shadows[theme];
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   const handlePress = () => {

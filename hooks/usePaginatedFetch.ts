@@ -57,8 +57,8 @@ export function usePaginatedFetch<T>(
       setError(null);
 
       const url = buildUrl(pageNum);
-      const response = await api.get<PaginatedResponse<T[]>>(url);
-      
+      const response = await api.get<PaginatedResponse<T[]>>(url) as PaginatedResponse<T[]>;
+
       const newData = response.data.data;
       const meta = response.data.meta;
 

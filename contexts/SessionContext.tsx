@@ -46,7 +46,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const signIn = async (data: LoginData): Promise<{ success: boolean; message?: string }> => {
     try {
-      const response = await api.post<UserSession>(
+      const response = await api.post<SuccessResponse<UserSession>>(
         '/auth/login',
         data,
         { requireAuth: false }

@@ -12,8 +12,9 @@ interface FloatingActionButtonProps {
 export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPress }) => {
   const tintColor = useThemeColor({}, 'tint');
   const backgroundColor = useThemeColor({}, 'backgroundSecondary');
-  const colorScheme = useColorScheme() ?? 'light';
-  const shadows = Shadows[colorScheme];
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const shadows = Shadows[theme];
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
