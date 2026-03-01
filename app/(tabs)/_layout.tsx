@@ -32,7 +32,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="create"
+        name="chat"
         options={{
           title: 'AI',
           tabBarIcon: ({ color }) => <Octicons name="sparkle" size={17} color={color} />,
@@ -50,13 +50,6 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <FontAwesome name="user-circle-o" size={18} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="chat"
-        options={{
-          title: 'Chat',
-          tabBarIcon: ({ color }) => <FontAwesome name="snapchat-square" size={18} color={color} />,
         }}
       />
     </Tabs>
