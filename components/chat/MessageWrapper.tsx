@@ -3,10 +3,12 @@ import React from 'react'
 import { Image, ScrollView, Text, View } from 'react-native'
 import { DisplayItemsToolRenderer } from './toolsRenderer/DisplayItemsToolRenderer'
 import { GenerateOutfitToolRenderer } from './toolsRenderer/GenerateOutfitToolRenderer'
+import { GeocodeCityToolRenderer } from './toolsRenderer/GeocodeCityToolRenderer'
 import { GetItemByIdToolRenderer } from './toolsRenderer/GetItemByIdToolRenderer'
 import { GetLookByIdToolRenderer } from './toolsRenderer/GetLookByIdToolRenderer'
 import { GetLooksToolRenderer } from './toolsRenderer/GetLooksToolRenderer'
 import { GetPlannedOutfitsToolRenderer } from './toolsRenderer/GetPlannedOutfitsToolRenderer'
+import { GetWeatherToolRenderer } from './toolsRenderer/GetWeatherToolRenderer'
 import { PlanOutfitToolRenderer } from './toolsRenderer/PlanOutfitToolRenderer'
 import { SaveLookToolRenderer } from './toolsRenderer/SaveLookToolRenderer'
 import { SearchItemsToolRenderer } from './toolsRenderer/SearchItemsToolRenderer'
@@ -34,7 +36,9 @@ const MessageWrapper = ({ message }: MessageWrapperProps) => {
       part.type === 'tool-getPlannedOutfits' ||
       part.type === 'tool-getLooks' ||
       part.type === 'tool-getItemById' ||
-      part.type === 'tool-getLookById'
+      part.type === 'tool-getLookById' ||
+      part.type === 'tool-geocodeCity' ||
+      part.type === 'tool-getWeather'
   )
 
   // Collect text & display parts
@@ -108,6 +112,14 @@ const MessageWrapper = ({ message }: MessageWrapperProps) => {
               case 'tool-getLookById':
                 return (
                   <GetLookByIdToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
+                )
+              case 'tool-geocodeCity':
+                return (
+                  <GeocodeCityToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
+                )
+              case 'tool-getWeather':
+                return (
+                  <GetWeatherToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
                 )
               default:
                 return null

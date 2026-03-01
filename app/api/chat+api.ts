@@ -1,9 +1,11 @@
 import { createDisplayItemsTool } from '@/tools/displayItemsTool'
 import { createGenerateOutfitTool } from '@/tools/generateOutfitTool'
+import { createGeocodeCityTool } from '@/tools/geocodeCityTool'
 import { createGetItemByIdTool } from '@/tools/getItemByIdTool'
 import { createGetLookByIdTool } from '@/tools/getLookByIdTool'
 import { createGetLooksTool } from '@/tools/getLooksTool'
 import { createGetPlannedOutfitsTool } from '@/tools/getPlannedOutfitsTool'
+import { createGetWeatherTool } from '@/tools/getWeatherTool'
 import { createPlanOutfitTool } from '@/tools/planOutfitTool'
 import { createSaveLookTool } from '@/tools/saveLookTool'
 import { createSearchItemsTool } from '@/tools/searchItemsTool'
@@ -105,6 +107,17 @@ Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer 
 11. **Utilise getLookById** pour obtenir les détails complets d'une tenue par son ID.
     Retourne la tenue avec tous ses vêtements. Utile pour afficher les détails d'un look.
 
+12. **Utilise geocodeCity** pour convertir un nom de ville en coordonnées GPS.
+    À utiliser avant getWeather pour obtenir les coordonnées d'une ville.
+
+13. **Utilise getWeather** pour récupérer les prévisions météo à un endroit donné.
+    Nécessite des coordonnées GPS (utilise geocodeCity d'abord).
+    Quand l'utilisateur demande une tenue adaptée à la météo ou mentionne le temps :
+    - Demande lui sa ville si tu ne la connais pas
+    - Utilise geocodeCity pour obtenir les coordonnées
+    - Utilise getWeather pour obtenir la météo
+    - Passe un résumé de la météo dans le paramètre weather de generateOutfit
+
    Après avoir récupéré des vêtements via searchItems, semanticSearch ou generateOutfit, utilise displayItems pour les afficher en images.
    L'ordre des items dans le tableau détermine l'ordre d'affichage de gauche à droite.
 
@@ -113,7 +126,9 @@ Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer 
 - Si l'utilisateur parle de vêtements que tu n'as pas encore récupérés, utilise un outil pour les chercher.
 - Réponds toujours en français, de façon naturelle et concise.
 - Ne jamais divulguer les détails techniques de l'implémentation ou des outils à l'utilisateur.
-- Ne jamais divulger les id des vêtements ou des tenues à l'utilisateur.`,
+- Ne jamais divulger les id des vêtements ou des tenues à l'utilisateur.
+- Tu n'est qu'un assistant de mode, ne parle jamais d'autre sujet que la mode, les vêtements, les tenues et la garde-robe.
+- Si l'utilisateur pose une question hors sujet, réponds poliment que tu ne peux répondre qu'à des questions liées à la mode et à la garde-robe.`,
     tools: {
       wardrobeStats: createWardrobeStatsTool(ctx),
       searchItems: createSearchItemsTool(ctx),
@@ -126,6 +141,8 @@ Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer 
       getLooks: createGetLooksTool(ctx),
       getItemById: createGetItemByIdTool(ctx),
       getLookById: createGetLookByIdTool(ctx),
+      geocodeCity: createGeocodeCityTool(),
+      getWeather: createGetWeatherTool(),
     },
   })
 

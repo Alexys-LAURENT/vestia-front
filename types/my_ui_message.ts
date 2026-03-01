@@ -1,9 +1,11 @@
 import { displayItemsSchema } from '@/tools/displayItemsTool'
 import { generateOutfitSchema } from '@/tools/generateOutfitTool'
+import { geocodeCitySchema } from '@/tools/geocodeCityTool'
 import { getItemByIdSchema } from '@/tools/getItemByIdTool'
 import { getLookByIdSchema } from '@/tools/getLookByIdTool'
 import { getLooksSchema } from '@/tools/getLooksTool'
 import { getPlannedOutfitsSchema } from '@/tools/getPlannedOutfitsTool'
+import { getWeatherSchema } from '@/tools/getWeatherTool'
 import { planOutfitSchema } from '@/tools/planOutfitTool'
 import { saveLookSchema } from '@/tools/saveLookTool'
 import { searchItemsSchema } from '@/tools/searchItemsTool'
@@ -14,10 +16,12 @@ import { z } from 'zod'
 import {
   DisplayItemsResponse,
   GenerateOutfitResponse,
+  GeocodeCityResponse,
   GetItemByIdResponse,
   GetLookByIdResponse,
   GetLooksResponse,
   GetPlannedOutfitsResponse,
+  GetWeatherResponse,
   PlanOutfitResponse,
   SaveLookResponse,
   SearchItemsResponse,
@@ -70,6 +74,14 @@ const tools = {
   getLookById: tool({
     inputSchema: getLookByIdSchema,
     outputSchema: z.custom<GetLookByIdResponse>(),
+  }),
+  geocodeCity: tool({
+    inputSchema: geocodeCitySchema,
+    outputSchema: z.custom<GeocodeCityResponse>(),
+  }),
+  getWeather: tool({
+    inputSchema: getWeatherSchema,
+    outputSchema: z.custom<GetWeatherResponse>(),
   }),
 } satisfies ToolSet
 

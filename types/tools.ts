@@ -76,3 +76,36 @@ export type GetLooksResponse = PaginatedResponse<Look>
 export type GetItemByIdResponse = SuccessResponse<Item>
 
 export type GetLookByIdResponse = SuccessResponse<Look>
+
+export type GeocodeCityResponse = {
+  results: {
+    name: string
+    latitude: number
+    longitude: number
+    country: string
+    region: string | null
+  }[]
+  error?: string
+}
+
+export type GetWeatherResponse = {
+  current: {
+    temperature: number
+    apparentTemperature: number
+    description: string
+    windSpeed: number
+    humidity: number
+  } | null
+  daily: {
+    date: string
+    temperatureMax: number
+    temperatureMin: number
+    apparentTemperatureMax: number
+    apparentTemperatureMin: number
+    precipitationSum: number
+    precipitationProbability: number
+    windSpeedMax: number
+    description: string
+  }[]
+  error?: string
+}
