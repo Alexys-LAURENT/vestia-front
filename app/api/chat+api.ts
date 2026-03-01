@@ -9,12 +9,48 @@ import { createSaveLookTool } from '@/tools/saveLookTool'
 import { createSearchItemsTool } from '@/tools/searchItemsTool'
 import { createSemanticSearchTool } from '@/tools/semanticSearchTool'
 import { createWardrobeStatsTool } from '@/tools/wardrobeStatsTool'
+import type { MyUIMessage } from '@/types/my_ui_message'
 import { backendFetch, createBackendClient } from '@/utils/fetchApiServerSide'
 import { google } from '@ai-sdk/google'
-import { convertToModelMessages, stepCountIs, streamText, UIMessage } from 'ai'
+import { convertToModelMessages, stepCountIs, streamText } from 'ai'
+
+/**
+ * Pré-traite les messages pour injecter le contexte des items attachés
+ * dans le texte des messages utilisateur, afin que le LLM en ait connaissance.
+ */
+function preprocessMessages(messages: MyUIMessage[]): MyUIMessage[] {
+  return messages.map((msg) => {
+    if (msg.role !== 'user') return msg
+
+    const attachedItems = msg.metadata?.attachedItems
+    if (!attachedItems || attachedItems.length === 0) return msg
+
+    const itemsContext = attachedItems
+      .map(
+        (item) =>
+          `- "${item.name}" (ID: ${item.idItem}${item.type ? `, Type: ${item.type}` : ''}${item.brand ? `, Marque: ${item.brand}` : ''})`
+      )
+      .join('\n')
+
+    const prefix = `[L'utilisateur a joint les vêtements suivants à son message :\n${itemsContext}]\n\n`
+
+    // Inject context into the text parts
+    const newParts = msg.parts.map((part, index) => {
+      if (part.type === 'text' && index === 0) {
+        return { ...part, text: prefix + part.text }
+      }
+      return part
+    })
+
+    return { ...msg, parts: newParts }
+  })
+}
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json()
+  const { messages }: { messages: MyUIMessage[] } = await req.json()
+
+  // Pré-traiter les messages pour injecter le contexte des items attachés
+  const processedMessages = preprocessMessages(messages)
 
   // Forwarder le token Bearer de l'utilisateur aux appels backend
   const authHeader = req.headers.get('authorization') ?? ''
@@ -28,7 +64,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google('gemini-2.5-flash'),
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(processedMessages),
     stopWhen: stepCountIs(10),
     system: `
 

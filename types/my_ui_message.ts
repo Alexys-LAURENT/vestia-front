@@ -75,4 +75,16 @@ const tools = {
 
 type MyTools = InferUITools<typeof tools>
 
-export type MyUIMessage = UIMessage<unknown, Record<string, unknown>, MyTools>
+export type AttachedItem = {
+  idItem: number
+  name: string
+  imageUrl: string
+  type?: string
+  brand?: string | null
+}
+
+export type MessageData = {
+  attachedItems?: AttachedItem[]
+}
+
+export type MyUIMessage = UIMessage<MessageData, Record<string, unknown>, MyTools>

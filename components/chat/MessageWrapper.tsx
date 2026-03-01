@@ -1,6 +1,6 @@
 import { MyUIMessage } from '@/types/my_ui_message'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Image, ScrollView, Text, View } from 'react-native'
 import { DisplayItemsToolRenderer } from './toolsRenderer/DisplayItemsToolRenderer'
 import { GenerateOutfitToolRenderer } from './toolsRenderer/GenerateOutfitToolRenderer'
 import { GetItemByIdToolRenderer } from './toolsRenderer/GetItemByIdToolRenderer'
@@ -19,6 +19,8 @@ interface MessageWrapperProps {
 
 const MessageWrapper = ({ message }: MessageWrapperProps) => {
   const isUser = message.role === 'user'
+  const attachedItems = isUser ? message.metadata?.attachedItems : undefined
+  const API_URL = process.env.EXPO_PUBLIC_API_URL
 
   // Collect tool invocation parts (shown above the text)
   const toolParts = message.parts.filter(
@@ -48,7 +50,7 @@ const MessageWrapper = ({ message }: MessageWrapperProps) => {
     <View className={`mb-md ${isUser ? 'items-end' : 'items-start'}`}>
       {/* Tool status indicators */}
       {toolParts.length > 0 && (
-        <View className="mb-xs w-full">
+        <View className="w-full mb-xs">
           {toolParts.map((part, i) => {
             switch (part.type) {
               case 'tool-wardrobeStats':
@@ -112,6 +114,29 @@ const MessageWrapper = ({ message }: MessageWrapperProps) => {
             }
           })}
         </View>
+      )}
+
+      {/* Attached items for user messages */}
+      {isUser && attachedItems && attachedItems.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 6, marginBottom: 6 }}
+          className="max-w-[85%]"
+        >
+          {attachedItems.map((item) => (
+            <View
+              key={item.idItem}
+              className="overflow-hidden border rounded-lg border-white/20 dark:border-dark-ui-border"
+            >
+              <Image
+                source={{ uri: `${API_URL}${item.imageUrl}` }}
+                className="w-[48px] h-[48px]"
+                resizeMode="cover"
+              />
+            </View>
+          ))}
+        </ScrollView>
       )}
 
       {/* Message bubble */}
