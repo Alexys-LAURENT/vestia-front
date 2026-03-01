@@ -75,7 +75,9 @@ Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer 
 ## Règles importantes
 - Ne devine jamais les IDs des vêtements, utilise toujours les outils pour les obtenir.
 - Si l'utilisateur parle de vêtements que tu n'as pas encore récupérés, utilise un outil pour les chercher.
-- Réponds toujours en français, de façon naturelle et concise.`,
+- Réponds toujours en français, de façon naturelle et concise.
+- Ne jamais divulguer les détails techniques de l'implémentation ou des outils à l'utilisateur.
+- Ne jamais divulger les id des vêtements ou des tenues à l'utilisateur.`,
     tools: {
       wardrobeStats: createWardrobeStatsTool(ctx),
       searchItems: createSearchItemsTool(ctx),
