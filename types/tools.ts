@@ -1,8 +1,8 @@
 import { ITEM_FORMALITIES, ITEM_SEASONS, ITEM_TYPES } from '@/constants/file_types'
-import { SuccessResponse } from './requests'
+import { PaginatedResponse, SuccessResponse } from './requests'
 
 import type { AxiosInstance } from 'axios'
-import { Item, Look } from './entities'
+import { Item, Look, PlannedOutfit } from './entities'
 
 /**
  * Type de la fonction backendFetch passée aux tools.
@@ -66,3 +66,13 @@ export type DisplayItemsResponse = {
     brand?: string | null
   }[]
 }
+
+export type PlanOutfitResponse = SuccessResponse<PlannedOutfit>
+
+export type GetPlannedOutfitsResponse = SuccessResponse<PlannedOutfit[]>
+
+export type GetLooksResponse = PaginatedResponse<Look>
+
+export type GetItemByIdResponse = SuccessResponse<Item>
+
+export type GetLookByIdResponse = SuccessResponse<Look>

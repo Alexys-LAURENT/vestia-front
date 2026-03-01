@@ -1,5 +1,10 @@
 import { createDisplayItemsTool } from '@/tools/displayItemsTool'
 import { createGenerateOutfitTool } from '@/tools/generateOutfitTool'
+import { createGetItemByIdTool } from '@/tools/getItemByIdTool'
+import { createGetLookByIdTool } from '@/tools/getLookByIdTool'
+import { createGetLooksTool } from '@/tools/getLooksTool'
+import { createGetPlannedOutfitsTool } from '@/tools/getPlannedOutfitsTool'
+import { createPlanOutfitTool } from '@/tools/planOutfitTool'
 import { createSaveLookTool } from '@/tools/saveLookTool'
 import { createSearchItemsTool } from '@/tools/searchItemsTool'
 import { createSemanticSearchTool } from '@/tools/semanticSearchTool'
@@ -25,7 +30,11 @@ export async function POST(req: Request) {
     model: google('gemini-2.5-flash'),
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(10),
-    system: `Tu es VestIA, un assistant personnel spécialisé dans la mode et la garde-robe.
+    system: `
+
+(Info : Nous sommes le ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })})
+
+Tu es VestIA, un assistant personnel spécialisé dans la mode et la garde-robe.
 Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer sa garde-robe.
 
 ## Comment utiliser les outils
@@ -44,6 +53,22 @@ Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer 
 5. **Utilise saveLook uniquement** si l'utilisateur confirme explicitement vouloir sauvegarder la tenue.
 
 6. **Utilise displayItems** pour montrer visuellement des vêtements dans le chat.
+
+7. **Utilise planOutfit** pour planifier une tenue existante à une date donnée.
+   L'utilisateur doit avoir un look sauvegardé (avec un ID) pour pouvoir le planifier.
+
+8. **Utilise getPlannedOutfits** pour récupérer les tenues planifiées de l'utilisateur.
+   Peut filtrer par plage de dates (startDate, endDate).
+
+9. **Utilise getLooks** pour récupérer la liste paginée des tenues sauvegardées.
+   Utile quand l'utilisateur veut voir ses tenues ou en choisir une pour la planifier.
+
+10. **Utilise getItemById** pour obtenir les détails complets d'un vêtement par son ID.
+    Utile quand l'utilisateur veut en savoir plus sur un vêtement précis.
+
+11. **Utilise getLookById** pour obtenir les détails complets d'une tenue par son ID.
+    Retourne la tenue avec tous ses vêtements. Utile pour afficher les détails d'un look.
+
    Après avoir récupéré des vêtements via searchItems, semanticSearch ou generateOutfit, utilise displayItems pour les afficher en images.
    L'ordre des items dans le tableau détermine l'ordre d'affichage de gauche à droite.
 
@@ -58,6 +83,11 @@ Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer 
       generateOutfit: createGenerateOutfitTool(ctx),
       saveLook: createSaveLookTool(ctx),
       displayItems: createDisplayItemsTool(ctx),
+      planOutfit: createPlanOutfitTool(ctx),
+      getPlannedOutfits: createGetPlannedOutfitsTool(ctx),
+      getLooks: createGetLooksTool(ctx),
+      getItemById: createGetItemByIdTool(ctx),
+      getLookById: createGetLookByIdTool(ctx),
     },
   })
 

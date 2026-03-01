@@ -23,6 +23,7 @@ const SUGGESTION_PROMPTS = [
   { icon: '🌦️', text: "Qu'est-ce que je devrais porter aujourd'hui ?" },
   { icon: '📊', text: "Dis moi tout ce que j'ai dans ma garde-robe" },
   { icon: '🔍', text: 'Trouve-moi un haut bleu dans ma garde-robe' },
+  { icon: 'ℹ️', text: "Qu'est ce que tu es capable de faire ?" },
 ]
 
 export default function ChatWrapper() {

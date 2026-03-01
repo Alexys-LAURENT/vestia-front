@@ -3,6 +3,11 @@ import React from 'react'
 import { Text, View } from 'react-native'
 import { DisplayItemsToolRenderer } from './toolsRenderer/DisplayItemsToolRenderer'
 import { GenerateOutfitToolRenderer } from './toolsRenderer/GenerateOutfitToolRenderer'
+import { GetItemByIdToolRenderer } from './toolsRenderer/GetItemByIdToolRenderer'
+import { GetLookByIdToolRenderer } from './toolsRenderer/GetLookByIdToolRenderer'
+import { GetLooksToolRenderer } from './toolsRenderer/GetLooksToolRenderer'
+import { GetPlannedOutfitsToolRenderer } from './toolsRenderer/GetPlannedOutfitsToolRenderer'
+import { PlanOutfitToolRenderer } from './toolsRenderer/PlanOutfitToolRenderer'
 import { SaveLookToolRenderer } from './toolsRenderer/SaveLookToolRenderer'
 import { SearchItemsToolRenderer } from './toolsRenderer/SearchItemsToolRenderer'
 import { SemanticSearchToolRenderer } from './toolsRenderer/SemanticSearchToolRenderer'
@@ -22,7 +27,12 @@ const MessageWrapper = ({ message }: MessageWrapperProps) => {
       part.type === 'tool-searchItems' ||
       part.type === 'tool-semanticSearch' ||
       part.type === 'tool-generateOutfit' ||
-      part.type === 'tool-saveLook'
+      part.type === 'tool-saveLook' ||
+      part.type === 'tool-planOutfit' ||
+      part.type === 'tool-getPlannedOutfits' ||
+      part.type === 'tool-getLooks' ||
+      part.type === 'tool-getItemById' ||
+      part.type === 'tool-getLookById'
   )
 
   // Collect text & display parts
@@ -72,6 +82,30 @@ const MessageWrapper = ({ message }: MessageWrapperProps) => {
               case 'tool-saveLook':
                 return (
                   <SaveLookToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
+                )
+              case 'tool-planOutfit':
+                return (
+                  <PlanOutfitToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
+                )
+              case 'tool-getPlannedOutfits':
+                return (
+                  <GetPlannedOutfitsToolRenderer
+                    key={`${message.id}-tool-${i}`}
+                    part={part}
+                    index={i}
+                  />
+                )
+              case 'tool-getLooks':
+                return (
+                  <GetLooksToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
+                )
+              case 'tool-getItemById':
+                return (
+                  <GetItemByIdToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
+                )
+              case 'tool-getLookById':
+                return (
+                  <GetLookByIdToolRenderer key={`${message.id}-tool-${i}`} part={part} index={i} />
                 )
               default:
                 return null
