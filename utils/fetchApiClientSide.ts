@@ -1,14 +1,17 @@
 import type {
   ApiError
 } from '@/types/requests';
+import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 
-interface FetchApiOptions extends Omit<RequestInit, 'body'> {
+interface FetchApiOptions {
+  method?: string;
   requireAuth?: boolean;
   body?: any;
   isFormData?: boolean;
+  headers?: Record<string, string>;
 }
 
 // Classe d'erreur custom pour les erreurs API
@@ -34,7 +37,7 @@ export class FetchApiError extends Error {
 }
 
 // Récupérer le token stocké
-const getStoredToken = async (): Promise<string | null> => {
+export const getStoredToken = async (): Promise<string | null> => {
   try {
     let sessionStr: string | null = null;
 
@@ -64,23 +67,23 @@ export const fetchApi = async <T>(
   endpoint: string,
   options: FetchApiOptions = {}
 ): Promise<T | ApiError> => {
-  const { requireAuth = true, headers: customHeaders, body, isFormData = false, ...restOptions } = options;
+  const { requireAuth = true, headers: customHeaders, body, isFormData = false, method = 'GET' } = options;
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     Accept: 'application/json',
     ...customHeaders,
   };
 
-  // Ne pas définir Content-Type pour FormData (le navigateur le fait automatiquement avec le boundary)
+  // Ne pas définir Content-Type pour FormData (axios le fait automatiquement avec le boundary)
   if (!isFormData) {
-    (headers as Record<string, string>)['Content-Type'] = 'application/json';
+    headers['Content-Type'] = 'application/json';
   }
 
   // Ajouter le token si nécessaire
   if (requireAuth) {
     const token = await getStoredToken();
     if (token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Bearer ${token}`;
     }
   }
   const API_URL = process.env.EXPO_PUBLIC_API_URL
@@ -91,35 +94,36 @@ export const fetchApi = async <T>(
   const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
 
   try {
-    const response = await fetch(url, {
-      ...restOptions,
+    const response = await axios({
+      url,
+      method,
       headers,
-      body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
-    });    
+      data: isFormData ? body : (body ?? undefined),
+    });
 
-    const contentType = response.headers.get('content-type');
-    let data: T | ApiError;
-
-    if (contentType?.includes('application/json')) {
-      data = await response.json();
-    } else {
-      throw new FetchApiError(response.status, {
-        error: true,
-        message: await response.text(),
-      });
-    }
+    const data: T | ApiError = response.data;
 
     // Vérifier si c'est une erreur API
     if (isApiError(data)) {
-      
       throw new FetchApiError(response.status, data);
     }
 
     return data;
   } catch (error) {
-    
     if (error instanceof FetchApiError) {
       throw error;
+    }
+
+    // Erreur axios avec réponse du serveur
+    if (error instanceof AxiosError && error.response) {
+      const data = error.response.data;
+      if (isApiError(data)) {
+        throw new FetchApiError(error.response.status, data);
+      }
+      throw new FetchApiError(error.response.status, {
+        error: true,
+        message: typeof data === 'string' ? data : (data?.message ?? 'Erreur serveur'),
+      });
     }
 
     // Erreur réseau
@@ -132,7 +136,7 @@ export const fetchApi = async <T>(
 /**
  * Helpers pour les méthodes HTTP courantes
  * @example ```
- *  import { api, FetchApiError } from '@/utils/fetchApi';
+ *  import { api, FetchApiError } from '@/utils/fetchApiClientSide';
     import type { SuccessResponse, PaginatedResponse } from '@/types/requests';
 
     // GET simple avec data typée

@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { SuccessMessageResponse } from '@/types/requests';
-import { api } from '@/utils/fetchApi';
+import { api } from '@/utils/fetchApiClientSide';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';

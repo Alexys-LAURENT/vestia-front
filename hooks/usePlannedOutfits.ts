@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react'
-import { api, FetchApiError } from '@/utils/fetchApi'
 import type { PlannedOutfit } from '@/types/entities'
 import type { SuccessResponse } from '@/types/requests'
+import { api, FetchApiError } from '@/utils/fetchApiClientSide'
+import { useCallback, useState } from 'react'
 
 export function usePlannedOutfits() {
   const [isLoading, setIsLoading] = useState(false)

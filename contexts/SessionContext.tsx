@@ -1,7 +1,7 @@
 import { useStorageState } from '@/hooks/useStorageState';
 import type { LoginData, RegisterData, UserSession } from '@/types/auth';
 import type { SuccessMessageResponse, SuccessResponse } from '@/types/requests';
-import { api, FetchApiError } from '@/utils/fetchApi';
+import { api, FetchApiError } from '@/utils/fetchApiClientSide';
 import { createContext, use, useMemo, type PropsWithChildren } from 'react';
 
 interface AuthContextType {

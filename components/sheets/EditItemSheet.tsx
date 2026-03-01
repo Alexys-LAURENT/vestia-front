@@ -3,7 +3,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Item } from '@/types/entities';
 import type { ItemFormState } from '@/types/item-analysis';
 import { SuccessResponse } from '@/types/requests';
-import { api, fetchApi } from '@/utils/fetchApi';
+import { api, fetchApi } from '@/utils/fetchApiClientSide';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

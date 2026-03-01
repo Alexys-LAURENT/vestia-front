@@ -5,7 +5,7 @@ import { Header } from '@/components/ui/header';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Item } from '@/types/entities';
-import { fetchApi } from '@/utils/fetchApi';
+import { fetchApi } from '@/utils/fetchApiClientSide';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';

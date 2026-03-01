@@ -1,6 +1,6 @@
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { ItemFormState } from '@/types/item-analysis';
-import { api } from '@/utils/fetchApi';
+import { api } from '@/utils/fetchApiClientSide';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

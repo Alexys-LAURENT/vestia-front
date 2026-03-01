@@ -52,6 +52,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FontAwesome name="user-circle-o" size={18} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: 'Chat',
+          tabBarIcon: ({ color }) => <FontAwesome name="snapchat-square" size={18} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

@@ -35,7 +35,7 @@
       "package": "com.anonymous.vestia"
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png",
       "bundler": "metro"
     },

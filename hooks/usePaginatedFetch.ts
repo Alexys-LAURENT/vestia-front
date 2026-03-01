@@ -1,5 +1,5 @@
 import type { PaginatedResponse } from '@/types/requests';
-import { api, FetchApiError } from '@/utils/fetchApi';
+import { api, FetchApiError } from '@/utils/fetchApiClientSide';
 import { useCallback, useEffect, useState } from 'react';
 
 interface UsePaginatedFetchOptions {

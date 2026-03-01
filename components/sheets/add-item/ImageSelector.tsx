@@ -1,5 +1,5 @@
 import { ItemAnalysisResponse } from '@/types/item-analysis';
-import { api } from '@/utils/fetchApi';
+import { api } from '@/utils/fetchApiClientSide';
 import React, { useCallback } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { ImageSelectorProps } from './types';
