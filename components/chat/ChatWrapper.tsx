@@ -11,12 +11,14 @@ import { useCallback, useRef, useState } from 'react'
 import {
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -167,12 +169,14 @@ export default function ChatWrapper() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         {/* Messages area */}
         {messages.length === 0 ? (
-          renderEmptyState()
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            {renderEmptyState()}
+          </TouchableWithoutFeedback>
         ) : (
           <FlatList
             ref={flatListRef}
@@ -185,8 +189,15 @@ export default function ChatWrapper() {
               paddingBottom: 8,
             }}
             showsVerticalScrollIndicator={false}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
             onContentSizeChange={() => {
               flatListRef.current?.scrollToEnd({ animated: true })
+            }}
+            onTouchStart={() => {
+              if (Platform.OS === 'android') {
+                Keyboard.dismiss()
+              }
             }}
           />
         )}

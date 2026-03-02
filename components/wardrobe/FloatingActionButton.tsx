@@ -1,29 +1,29 @@
-import { Shadows, Spacing } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { Ionicons } from '@expo/vector-icons';
-import React, { useRef } from 'react';
-import { Animated, StyleSheet, TouchableOpacity } from 'react-native';
+import { Shadows, Spacing } from '@/constants/theme'
+import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useThemeColor } from '@/hooks/use-theme-color'
+import { Ionicons } from '@expo/vector-icons'
+import React, { useRef } from 'react'
+import { Animated, StyleSheet, TouchableOpacity } from 'react-native'
 
 interface FloatingActionButtonProps {
-  onPress: () => void;
+  onPress: () => void
 }
 
 export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPress }) => {
-  const tintColor = useThemeColor({}, 'tint');
-  const backgroundColor = useThemeColor({}, 'backgroundSecondary');
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-  const shadows = Shadows[theme];
+  const tintColor = useThemeColor({}, 'tint')
+  const backgroundColor = useThemeColor({}, 'backgroundSecondary')
+  const colorScheme = useColorScheme()
+  const theme = colorScheme === 'dark' ? 'dark' : 'light'
+  const shadows = Shadows[theme]
 
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.92,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
@@ -31,8 +31,8 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPr
       tension: 50,
       friction: 3,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   return (
     <TouchableOpacity
@@ -40,6 +40,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPr
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       activeOpacity={0.9}
+      style={styles.touchable}
     >
       <Animated.View
         style={[
@@ -54,18 +55,22 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPr
         <Ionicons name="add" size={32} color={backgroundColor} />
       </Animated.View>
     </TouchableOpacity>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
-  button: {
+  touchable: {
     position: 'absolute',
     bottom: Spacing.xl,
     right: Spacing.xl,
+    width: 64,
+    height: 64,
+  },
+  button: {
     width: 64,
     height: 64,
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+})

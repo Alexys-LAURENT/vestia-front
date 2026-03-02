@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "softwareKeyboardLayoutMode": "pan",
+      "softwareKeyboardLayoutMode": "resize",
       "permissions": [
         "INTERNET",
         "ACCESS_NETWORK_STATE",
@@ -41,6 +41,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Autorisez $(PRODUCT_NAME) à accéder à votre caméra pour prendre des photos de vêtements."
+        }
+      ],
       [
         "expo-splash-screen",
         {

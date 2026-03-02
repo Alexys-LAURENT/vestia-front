@@ -23,6 +23,7 @@
     "ai": "^6.0.105",
     "axios": "^1.13.6",
     "expo": "^55.0.4",
+    "expo-camera": "~55.0.9",
     "expo-constants": "~55.0.7",
     "expo-font": "~55.0.4",
     "expo-haptics": "~55.0.8",

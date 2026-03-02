@@ -1,63 +1,64 @@
-import { useThemeColor } from '@/hooks/use-theme-color';
-import type { ItemFormState } from '@/types/item-analysis';
-import { api } from '@/utils/fetchApiClientSide';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import React, { useCallback, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeColor } from '@/hooks/use-theme-color'
+import type { ItemFormState } from '@/types/item-analysis'
+import { api } from '@/utils/fetchApiClientSide'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import React, { useCallback, useState } from 'react'
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   AnalyzingStep,
+  CameraCapture,
   ImageSelector,
   initialFormState,
   ItemForm,
   SubmittingStep,
   type AddItemStep,
-} from '.';
-import { useImagePicker } from '../../media-gallery';
-import type { MediaAssetWithUri } from '../../media-gallery/types/media-gallery.types';
-import { ThemedText } from '../../themed-text';
-import { Sheet, useSheetRef } from '../Sheet';
+} from '.'
+import { useImagePicker } from '../../media-gallery'
+import type { MediaAssetWithUri } from '../../media-gallery/types/media-gallery.types'
+import { ThemedText } from '../../themed-text'
+import { Sheet, useSheetRef } from '../Sheet'
 
 interface AddItemSheetProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
+  isOpen: boolean
+  onClose: () => void
+  onSuccess?: () => void
 }
 
 const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
-  const sheetRef = useSheetRef();
-  const { pick } = useImagePicker();
+  const sheetRef = useSheetRef()
+  const { pick } = useImagePicker()
 
   // Theme colors
-  const backgroundColor = useThemeColor({}, 'background');
-  const textColor = useThemeColor({}, 'text');
-  const tintColor = useThemeColor({}, 'tint');
+  const backgroundColor = useThemeColor({}, 'background')
+  const textColor = useThemeColor({}, 'text')
+  const tintColor = useThemeColor({}, 'tint')
 
   // State
-  const [step, setStep] = useState<AddItemStep>('select-image');
-  const [selectedImage, setSelectedImage] = useState<MediaAssetWithUri | null>(null);
-  const [formState, setFormState] = useState<ItemFormState>(initialFormState);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [step, setStep] = useState<AddItemStep>('select-image')
+  const [selectedImage, setSelectedImage] = useState<MediaAssetWithUri | null>(null)
+  const [formState, setFormState] = useState<ItemFormState>(initialFormState)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   React.useEffect(() => {
     if (isOpen) {
-      sheetRef.current?.present();
+      sheetRef.current?.present()
     } else {
-      sheetRef.current?.dismiss();
+      sheetRef.current?.dismiss()
     }
-  }, [isOpen, sheetRef]);
+  }, [isOpen, sheetRef])
 
   const resetState = useCallback(() => {
-    setStep('select-image');
-    setSelectedImage(null);
-    setFormState(initialFormState);
-    setErrorMessage(null);
-  }, []);
+    setStep('select-image')
+    setSelectedImage(null)
+    setFormState(initialFormState)
+    setErrorMessage(null)
+  }, [])
 
   const handleClose = useCallback(() => {
-    resetState();
-    onClose();
-  }, [onClose, resetState]);
+    resetState()
+    onClose()
+  }, [onClose, resetState])
 
   const pickImage = useCallback(async () => {
     const images = await pick({
@@ -66,69 +67,80 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
       enableCrop: false,
       excludedExtensions: ['gif', 'heic'],
       stackBehavior: 'push',
-    });
+    })
 
     if (images && images.length > 0) {
-      setSelectedImage(images[0]);
-      setErrorMessage(null);
+      setSelectedImage(images[0])
+      setErrorMessage(null)
     }
-  }, [pick]);
+  }, [pick])
 
+  const openCamera = useCallback(() => {
+    setStep('camera')
+  }, [])
 
+  const handleCameraCapture = useCallback((image: MediaAssetWithUri) => {
+    setSelectedImage(image)
+    setErrorMessage(null)
+    setStep('select-image')
+  }, [])
 
   const submitItem = useCallback(async () => {
-    if (!selectedImage) return;
+    if (!selectedImage) return
 
-    setStep('submitting');
+    setStep('submitting')
 
     try {
-      const formData = new FormData();
-      const imageUri = selectedImage.croppedUri || selectedImage.localUri || selectedImage.uri;
+      const formData = new FormData()
+      const imageUri = selectedImage.croppedUri || selectedImage.localUri || selectedImage.uri
 
       formData.append('image', {
         uri: imageUri,
         type: selectedImage.mimeType || 'image/jpeg',
         name: selectedImage.filename || 'image.jpg',
-      } as unknown as Blob);
+      } as unknown as Blob)
 
-      formData.append('name', formState.name);
-      formData.append('description', formState.description);
-      formData.append('type', formState.type);
-      formData.append('season', formState.season);
-      formData.append('formality', formState.formality);
-      formData.append('mainColor', formState.mainColor);
+      formData.append('name', formState.name)
+      formData.append('description', formState.description)
+      formData.append('type', formState.type)
+      formData.append('season', formState.season)
+      formData.append('formality', formState.formality)
+      formData.append('mainColor', formState.mainColor)
 
       formState.tags.forEach((tag) => {
-          formData.append(`tags`, tag);
-      });
+        formData.append(`tags`, tag)
+      })
 
       if (formState.additionalColors.length > 0) {
         formState.additionalColors.forEach((color) => {
-          formData.append(`additionalColors`, color);
-        });
-      }else{
-        formData.append('additionalColors', '');
+          formData.append(`additionalColors`, color)
+        })
+      } else {
+        formData.append('additionalColors', '')
       }
-      formData.append('brand', formState.brand || '');
-      formData.append('reference', formState.reference || '');
+      formData.append('brand', formState.brand || '')
+      formData.append('reference', formState.reference || '')
 
-      await api.postFormData('/items', formData);
+      await api.postFormData('/items', formData)
 
-      Alert.alert('Succès', 'Le vêtement a été ajouté à votre garde-robe !');
-      onSuccess?.();
-      handleClose();
+      Alert.alert('Succès', 'Le vêtement a été ajouté à votre garde-robe !')
+      onSuccess?.()
+      handleClose()
     } catch (error) {
-      console.error('Erreur création:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la création');
-      setStep('form');
+      console.error('Erreur création:', error)
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la création')
+      setStep('form')
     }
-  }, [selectedImage, formState, onSuccess, handleClose]);
+  }, [selectedImage, formState, onSuccess, handleClose])
 
-  const updateFormField = useCallback(<K extends keyof ItemFormState>(field: K, value: ItemFormState[K]) => {
-    setFormState((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  const updateFormField = useCallback(
+    <K extends keyof ItemFormState>(field: K, value: ItemFormState[K]) => {
+      setFormState((prev) => ({ ...prev, [field]: value }))
+    },
+    []
+  )
 
-  const isSubmitDisabled = !formState.name || !formState.type || !formState.mainColor;
+  const isSubmitDisabled = !formState.name || !formState.type || !formState.mainColor
 
   const renderContent = () => {
     switch (step) {
@@ -138,6 +150,7 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
             selectedImage={selectedImage}
             errorMessage={errorMessage}
             onPickImage={pickImage}
+            onOpenCamera={openCamera}
             tintColor={tintColor}
             textColor={textColor}
             setErrorMessage={setErrorMessage}
@@ -145,9 +158,19 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
             setSelectedImage={setSelectedImage}
             setStep={setStep}
           />
-        );
+        )
+      case 'camera':
+        return (
+          <CameraCapture onCapture={handleCameraCapture} onClose={() => setStep('select-image')} />
+        )
       case 'analyzing':
-        return <AnalyzingStep selectedImage={selectedImage} tintColor={tintColor} textColor={textColor} />;
+        return (
+          <AnalyzingStep
+            selectedImage={selectedImage}
+            tintColor={tintColor}
+            textColor={textColor}
+          />
+        )
       case 'form':
         return (
           <ItemForm
@@ -159,11 +182,28 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
             tintColor={tintColor}
             textColor={textColor}
           />
-        );
+        )
       case 'submitting':
-        return <SubmittingStep tintColor={tintColor} textColor={textColor} />;
+        return <SubmittingStep tintColor={tintColor} textColor={textColor} />
     }
-  };
+  }
+
+  if (step === 'camera') {
+    return (
+      <Sheet
+        ref={sheetRef}
+        onDismiss={handleClose}
+        snapPoints={['100%']}
+        enableDynamicSizing={false}
+        handleComponent={null}
+        enableContentPanningGesture={false}
+      >
+        <View style={[styles.contentContainer, { backgroundColor: '#000' }]}>
+          {renderContent()}
+        </View>
+      </Sheet>
+    )
+  }
 
   return (
     <Sheet
@@ -188,8 +228,8 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
         </SafeAreaView>
       </BottomSheetScrollView>
     </Sheet>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   contentContainer: {
@@ -218,6 +258,6 @@ const styles = StyleSheet.create({
   headerSpacer: {
     width: 60,
   },
-});
+})
 
-export default AddItemSheet;
+export default AddItemSheet
