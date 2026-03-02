@@ -37,7 +37,7 @@ export default function ChatWrapper() {
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const API_URL = process.env.EXPO_PUBLIC_API_URL
 
-  const { messages, error, sendMessage, status } = useChat<MyUIMessage>({
+  const { messages, setMessages, error, sendMessage, status } = useChat<MyUIMessage>({
     transport: new DefaultChatTransport({
       fetch: expoFetch as unknown as typeof globalThis.fetch,
       api: generateAPIUrl('/api/chat'),
@@ -83,6 +83,13 @@ export default function ChatWrapper() {
   const handleRemoveItem = useCallback((idItem: number) => {
     setSelectedItems((prev) => prev.filter((i) => i.idItem !== idItem))
   }, [])
+
+  const handleNewConversation = useCallback(() => {
+    if (isStreaming) return
+    setMessages([])
+    setInput('')
+    setSelectedItems([])
+  }, [isStreaming, setMessages])
 
   const handleSuggestion = useCallback(
     (text: string) => {
@@ -139,6 +146,25 @@ export default function ChatWrapper() {
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-light-bg-primary dark:bg-dark-bg-primary">
+      {/* Header with new conversation button */}
+      {messages.length > 0 && (
+        <View className="flex-row items-center justify-between border-b border-light-ui-border dark:border-dark-ui-border px-base py-sm">
+          <Text className="font-semibold text-body text-light-text-primary dark:text-dark-text-primary">
+            Vestia AI
+          </Text>
+          <Pressable
+            onPress={handleNewConversation}
+            disabled={isStreaming}
+            className={`flex-row items-center gap-xs px-md py-xs rounded-full bg-light-bg-tertiary dark:bg-dark-bg-tertiary active:opacity-70 ${isStreaming ? 'opacity-40' : ''}`}
+          >
+            <FontAwesome name="plus" size={12} color="#8A8A8A" />
+            <Text className="font-medium text-body-sm text-light-text-secondary dark:text-dark-text-secondary">
+              Nouveau
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

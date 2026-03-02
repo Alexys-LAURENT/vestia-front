@@ -1,6 +1,7 @@
 import { MyUIMessage } from '@/types/my_ui_message'
 import React from 'react'
 import { Image, ScrollView, Text, View } from 'react-native'
+import MarkdownText from './MarkdownText'
 import { DisplayItemsToolRenderer } from './toolsRenderer/DisplayItemsToolRenderer'
 import { GenerateOutfitToolRenderer } from './toolsRenderer/GenerateOutfitToolRenderer'
 import { GeocodeCityToolRenderer } from './toolsRenderer/GeocodeCityToolRenderer'
@@ -164,18 +165,17 @@ const MessageWrapper = ({ message }: MessageWrapperProps) => {
             switch (part.type) {
               case 'text':
                 if (!part.text.trim()) return null
-                return (
-                  <Text
-                    key={`${message.id}-${i}`}
-                    className={`text-body-sm leading-relaxed ${
-                      isUser
-                        ? 'text-white dark:text-dark-bg-primary'
-                        : 'text-light-text-primary dark:text-dark-text-primary'
-                    }`}
-                  >
-                    {part.text}
-                  </Text>
-                )
+                if (isUser) {
+                  return (
+                    <Text
+                      key={`${message.id}-${i}`}
+                      className="text-body-sm leading-relaxed text-white dark:text-dark-bg-primary"
+                    >
+                      {part.text}
+                    </Text>
+                  )
+                }
+                return <MarkdownText key={`${message.id}-${i}`}>{part.text}</MarkdownText>
               default:
                 return null
             }
