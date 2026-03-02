@@ -1,19 +1,19 @@
-import { ThemedText } from '@/components/themed-text';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ThemedText } from '@/components/themed-text'
+import { LinearGradient } from 'expo-linear-gradient'
+import React, { useEffect } from 'react'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
-} from 'react-native-reanimated';
-import type { AnalyzingStepProps, SubmittingStepProps } from './types';
+} from 'react-native-reanimated'
+import type { AnalyzingStepProps, SubmittingStepProps } from './types'
 
-export const AnalyzingStep = ({ tintColor, selectedImage }: AnalyzingStepProps) => {
-  const imageUri = selectedImage?.croppedUri || selectedImage?.localUri || selectedImage?.uri;
-  const pulse = useSharedValue(0);
+export const AnalyzingStep = ({ selectedImage }: AnalyzingStepProps) => {
+  const imageUri = selectedImage?.croppedUri || selectedImage?.localUri || selectedImage?.uri
+  const pulse = useSharedValue(0)
 
   useEffect(() => {
     pulse.value = withRepeat(
@@ -23,12 +23,12 @@ export const AnalyzingStep = ({ tintColor, selectedImage }: AnalyzingStepProps) 
       }),
       -1,
       true
-    );
-  }, [pulse]);
+    )
+  }, [pulse])
 
   const overlayAnimatedStyle = useAnimatedStyle(() => ({
     opacity: 0.1 + pulse.value * 0.3,
-  }));
+  }))
 
   return (
     <View style={styles.container}>
@@ -52,8 +52,8 @@ export const AnalyzingStep = ({ tintColor, selectedImage }: AnalyzingStepProps) 
         L&apos;IA analyse votre vêtement pour pré-remplir les informations
       </ThemedText>
     </View>
-  );
-};
+  )
+}
 
 export const SubmittingStep = ({ tintColor }: SubmittingStepProps) => {
   return (
@@ -61,8 +61,8 @@ export const SubmittingStep = ({ tintColor }: SubmittingStepProps) => {
       <ActivityIndicator size="large" color={tintColor} />
       <ThemedText style={styles.text}>Création en cours...</ThemedText>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   selectedImageContainer: {
@@ -93,4 +93,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
-});
+})

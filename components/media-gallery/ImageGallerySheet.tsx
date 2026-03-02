@@ -1,36 +1,24 @@
-import * as MediaLibrary from "expo-media-library";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  ActivityIndicator,
-  BackHandler,
-  Dimensions,
-  Text,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as MediaLibrary from 'expo-media-library'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ActivityIndicator, BackHandler, Dimensions, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { AlbumSelector } from "@/components/media-gallery/AlbumSelector";
-import { CropFramePlaceholder } from "@/components/media-gallery/CropFramePlaceholder";
-import { EmptyState } from "@/components/media-gallery/EmptyState";
-import { GalleryHeader } from "@/components/media-gallery/GalleryHeader";
-import { GalleryImage } from "@/components/media-gallery/GalleryImage";
-import { useMediaGallery } from "@/components/media-gallery/hooks/useMediaGallery";
+import { AlbumSelector } from '@/components/media-gallery/AlbumSelector'
+import { CropFramePlaceholder } from '@/components/media-gallery/CropFramePlaceholder'
+import { EmptyState } from '@/components/media-gallery/EmptyState'
+import { GalleryHeader } from '@/components/media-gallery/GalleryHeader'
+import { GalleryImage } from '@/components/media-gallery/GalleryImage'
+import { useMediaGallery } from '@/components/media-gallery/hooks/useMediaGallery'
 import {
   InlineImageCropEditor,
   InlineImageCropEditorRef,
-} from "@/components/media-gallery/InlineImageCropEditor";
-import { MediaPreviewModal } from "@/components/media-gallery/MediaPreviewModal";
-import { SelectionCounter } from "@/components/media-gallery/SelectionCounter";
-import { BottomSheetFlashList } from "@gorhom/bottom-sheet";
-import { Sheet, useSheetRef } from "../sheets/Sheet";
-import { ImageGallerySheetProps } from "./types/media-gallery.types";
-import { getLocalUri } from "./utils/media-gallery.utils";
+} from '@/components/media-gallery/InlineImageCropEditor'
+import { MediaPreviewModal } from '@/components/media-gallery/MediaPreviewModal'
+import { SelectionCounter } from '@/components/media-gallery/SelectionCounter'
+import { BottomSheetFlashList } from '@gorhom/bottom-sheet'
+import { Sheet, useSheetRef } from '../sheets/Sheet'
+import { ImageGallerySheetProps } from './types/media-gallery.types'
+import { getLocalUri } from './utils/media-gallery.utils'
 
 /**
  * Composant principal de la galerie d'images dans une Bottom Sheet
@@ -61,23 +49,21 @@ export function ImageGallerySheet({
   maxSelection,
   excludedExtensions,
   enableCrop = false,
-  cropConfig = { aspectRatio: 1, shape: "rectangle" },
+  cropConfig = { aspectRatio: 1, shape: 'rectangle' },
   cropHeight = 300,
   stackBehavior,
 }: ImageGallerySheetProps) {
-  const sheetRef = useSheetRef();
-  const cropEditorRef = useRef<InlineImageCropEditorRef>(null);
-  const insets = useSafeAreaInsets();
-  const screenWidth = Dimensions.get("window").width;
-  const imageSize = useMemo(() => (screenWidth - 8) / 3, [screenWidth]);
+  const sheetRef = useSheetRef()
+  const cropEditorRef = useRef<InlineImageCropEditorRef>(null)
+  const insets = useSafeAreaInsets()
+  const screenWidth = Dimensions.get('window').width
+  const imageSize = useMemo(() => (screenWidth - 8) / 3, [screenWidth])
 
-  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
-  const [previewAsset, setPreviewAsset] = useState<MediaLibrary.Asset | null>(
-    null,
-  );
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-  const [isAlbumSelectorVisible, setIsAlbumSelectorVisible] = useState(false);
-  const albumSelectorRef = useRef<{ loadAlbums: () => void }>(null);
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null)
+  const [previewAsset, setPreviewAsset] = useState<MediaLibrary.Asset | null>(null)
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false)
+  const [isAlbumSelectorVisible, setIsAlbumSelectorVisible] = useState(false)
+  const albumSelectorRef = useRef<{ loadAlbums: () => void }>(null)
 
   const {
     photos,
@@ -98,74 +84,66 @@ export function ImageGallerySheet({
     allowMultipleSelection,
     maxSelection,
     excludedExtensions,
-  });
+  })
 
-  const selectedArray = Array.from(selectedIds);
-  const selectedAssetId = selectedArray.length > 0 ? selectedArray[0] : null;
+  const selectedArray = Array.from(selectedIds)
+  const selectedAssetId = selectedArray.length > 0 ? selectedArray[0] : null
 
   // Charger l'URI de l'image sélectionnée pour le crop
   useEffect(() => {
     const loadSelectedImage = async () => {
       if (enableCrop && selectedAssetId && !allowMultipleSelection) {
-        const asset = photos.find((p) => p.id === selectedAssetId);
+        const asset = photos.find((p) => p.id === selectedAssetId)
         if (asset) {
-          const uri = await getLocalUri(asset);
-          setSelectedImageUri(uri);
+          const uri = await getLocalUri(asset)
+          setSelectedImageUri(uri)
         }
       } else {
-        setSelectedImageUri(null);
+        setSelectedImageUri(null)
       }
-    };
+    }
 
-    loadSelectedImage();
-  }, [selectedAssetId, enableCrop, allowMultipleSelection, photos]);
+    loadSelectedImage()
+  }, [selectedAssetId, enableCrop, allowMultipleSelection, photos])
 
   React.useEffect(() => {
     if (isOpen) {
-      sheetRef.current?.present();
+      sheetRef.current?.present()
       // Preload albums when sheet opens
-      albumSelectorRef.current?.loadAlbums();
+      albumSelectorRef.current?.loadAlbums()
       // Reset to "Récents" on open
-      setSelectedAlbum(null);
+      setSelectedAlbum(null)
     } else {
-      sheetRef.current?.dismiss();
+      sheetRef.current?.dismiss()
     }
-  }, [isOpen, sheetRef, setSelectedAlbum]);
+  }, [isOpen, sheetRef, setSelectedAlbum])
 
   const handleClose = useCallback(() => {
-    sheetRef.current?.dismiss();
-    clearSelection();
-    setSelectedImageUri(null);
-    setIsAlbumSelectorVisible(false); // Reset album selector visibility
-    onClose();
-  }, [clearSelection, onClose, sheetRef]);
+    sheetRef.current?.dismiss()
+    clearSelection()
+    setSelectedImageUri(null)
+    setIsAlbumSelectorVisible(false) // Reset album selector visibility
+    onClose()
+  }, [clearSelection, onClose, sheetRef])
 
   // Gérer le bouton retour natif Android
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        handleClose();
-        return true; // Empêche le comportement par défaut
-      },
-    );
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleClose()
+      return true // Empêche le comportement par défaut
+    })
 
-    return () => backHandler.remove();
-  }, [isOpen, handleClose]);
+    return () => backHandler.remove()
+  }, [isOpen, handleClose])
 
   const handleValidate = useCallback(async () => {
-    if (
-      enableCrop &&
-      selectedImageUri &&
-      cropEditorRef.current &&
-      !allowMultipleSelection
-    ) {
+    if (enableCrop && selectedImageUri && cropEditorRef.current && !allowMultipleSelection) {
       // Mode crop: récupérer l'image croppée
       try {
-        const croppedUri = await cropEditorRef.current.getCroppedImage();
-        const selectedAssets = await getSelectedAssets();
+        const croppedUri = await cropEditorRef.current.getCroppedImage()
+        const selectedAssets = await getSelectedAssets()
 
         if (selectedAssets.length > 0) {
           const assetWithCrop = {
@@ -173,25 +151,25 @@ export function ImageGallerySheet({
             croppedUri,
             uri: croppedUri,
             localUri: croppedUri,
-            mimeType: "image/jpeg", // expo-image-manipulator outputs JPEG by default
-          };
-          onValidateSelection([assetWithCrop]);
-          handleClose();
+            mimeType: 'image/jpeg', // expo-image-manipulator outputs JPEG by default
+          }
+          onValidateSelection([assetWithCrop])
+          handleClose()
         }
       } catch (error) {
-        console.error("Error getting cropped image:", error);
+        console.error('Error getting cropped image:', error)
       }
     } else {
       // Mode normal: retourner les assets sélectionnés
-      const selectedAssets = await getSelectedAssets();
+      const selectedAssets = await getSelectedAssets()
 
       if (selectedAssets.length > 0) {
         if (allowMultipleSelection) {
-          onValidateSelection(selectedAssets);
+          onValidateSelection(selectedAssets)
         } else {
-          onValidateSelection([selectedAssets[0]]);
+          onValidateSelection([selectedAssets[0]])
         }
-        handleClose();
+        handleClose()
       }
     }
   }, [
@@ -201,38 +179,36 @@ export function ImageGallerySheet({
     getSelectedAssets,
     onValidateSelection,
     handleClose,
-  ]);
+  ])
 
   const handleToggleSelection = useCallback(
     (id: string) => {
-      toggleSelection(id);
+      toggleSelection(id)
     },
-    [toggleSelection],
-  );
+    [toggleSelection]
+  )
 
   const handleLongPress = useCallback((asset: MediaLibrary.Asset) => {
-    console.log("Long press detected on asset:", asset.id);
-    setPreviewAsset(asset);
-    setIsPreviewVisible(true);
-    console.log("Modal should be visible now");
-  }, []);
+    setPreviewAsset(asset)
+    setIsPreviewVisible(true)
+  }, [])
 
   const handleClosePreview = useCallback(() => {
-    setIsPreviewVisible(false);
-    setPreviewAsset(null);
-  }, []);
+    setIsPreviewVisible(false)
+    setPreviewAsset(null)
+  }, [])
 
   const handleOpenAlbumSelector = useCallback(() => {
-    setIsAlbumSelectorVisible((prev) => !prev);
-  }, []);
+    setIsAlbumSelectorVisible((prev) => !prev)
+  }, [])
 
   const handleSelectAlbum = useCallback(
     (album: MediaLibrary.Album | null) => {
-      setSelectedAlbum(album);
-      setIsAlbumSelectorVisible(false);
+      setSelectedAlbum(album)
+      setIsAlbumSelectorVisible(false)
     },
-    [setSelectedAlbum],
-  );
+    [setSelectedAlbum]
+  )
 
   const renderItem = useCallback(
     ({ item }: { item: MediaLibrary.Asset }) => (
@@ -244,25 +220,24 @@ export function ImageGallerySheet({
         isSelected={isSelected(item.id)}
       />
     ),
-    [imageSize, handleToggleSelection, handleLongPress, isSelected],
-  );
+    [imageSize, handleToggleSelection, handleLongPress, isSelected]
+  )
 
   const renderFooter = useCallback(() => {
-    if (!isLoading) return null;
+    if (!isLoading) return null
     return (
       <View className="items-center py-5">
         <ActivityIndicator size="small" />
       </View>
-    );
-  }, [isLoading]);
+    )
+  }, [isLoading])
 
   // Memoize FlashList props for optimal performance (FlashList v2 requirement)
-  const keyExtractor = useCallback((item: MediaLibrary.Asset) => item.id, []);
+  const keyExtractor = useCallback((item: MediaLibrary.Asset) => item.id, [])
 
-  const contentContainerStyle = useMemo(() => ({ padding: 2 }), []);
+  const contentContainerStyle = useMemo(() => ({ padding: 2 }), [])
 
-  const canShowFilters =
-    (!allowedMediaTypes || allowedMediaTypes === "all") && !enableCrop;
+  const canShowFilters = (!allowedMediaTypes || allowedMediaTypes === 'all') && !enableCrop
 
   return (
     <>
@@ -272,10 +247,10 @@ export function ImageGallerySheet({
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         enableDismissOnClose
-        snapPoints={["70%", "100%"]}
+        snapPoints={['70%', '100%']}
         enableDynamicSizing={false}
         handleStyle={{ height: 0 }}
-        handleIndicatorStyle={{ width: 50, height: 4, backgroundColor: "#ccc" }}
+        handleIndicatorStyle={{ width: 50, height: 4, backgroundColor: '#ccc' }}
         enableOverDrag={false}
         topInset={insets.top}
         stackBehavior={stackBehavior}
@@ -313,10 +288,7 @@ export function ImageGallerySheet({
         {permission === true && (
           <View className="flex-1">
             {allowMultipleSelection && (
-              <SelectionCounter
-                selectedCount={selectedIds.size}
-                maxSelection={maxSelection}
-              />
+              <SelectionCounter selectedCount={selectedIds.size} maxSelection={maxSelection} />
             )}
 
             {/* Cadrant de crop (toujours visible quand enableCrop est activé) */}
@@ -372,5 +344,5 @@ export function ImageGallerySheet({
         onClose={handleClosePreview}
       />
     </>
-  );
+  )
 }

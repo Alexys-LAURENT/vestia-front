@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     stopWhen: stepCountIs(10),
     system: `
 
-(Info : Nous sommes le ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })})
+(Info : Nous sommes le ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })})
 
 Tu es VestIA, un assistant personnel spécialisé dans la mode et la garde-robe.
 Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer sa garde-robe.
@@ -126,7 +126,7 @@ Tu aides l'utilisateur à trouver des vêtements, composer des tenues et gérer 
 - Si l'utilisateur parle de vêtements que tu n'as pas encore récupérés, utilise un outil pour les chercher.
 - Réponds toujours en français, de façon naturelle et concise.
 - Ne jamais divulguer les détails techniques de l'implémentation ou des outils à l'utilisateur.
-- Ne jamais divulger les id des vêtements ou des tenues à l'utilisateur.
+- Ne jamais divulguer les id des vêtements ou des tenues à l'utilisateur.
 - Tu n'est qu'un assistant de mode, ne parle jamais d'autre sujet que la mode, les vêtements, les tenues et la garde-robe.
 - Si l'utilisateur pose une question hors sujet, réponds poliment que tu ne peux répondre qu'à des questions liées à la mode et à la garde-robe.`,
     tools: {
