@@ -1,13 +1,13 @@
-import { ThemedText } from '@/components/themed-text';
-import { Input } from '@/components/ui/input';
-import { Animation, Colors, Radius, Spacing, Typography } from '@/constants/theme';
-import { useSession } from '@/contexts/SessionContext';
-import { useBehavior } from '@/hooks/use-behavior';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { ThemedText } from '@/components/themed-text'
+import { Input } from '@/components/ui/input'
+import { Animation, Colors, Radius, Spacing, Typography } from '@/constants/theme'
+import { useSession } from '@/contexts/SessionContext'
+import { useBehavior } from '@/hooks/use-behavior'
+import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useThemeColor } from '@/hooks/use-theme-color'
+import { Ionicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
+import { useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Animated,
@@ -17,26 +17,26 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from 'react-native'
 
 export default function SignIn() {
-  const { signIn } = useSession();
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-  const colors = Colors[theme];
+  const { signIn } = useSession()
+  const colorScheme = useColorScheme()
+  const theme = colorScheme === 'dark' ? 'dark' : 'light'
+  const colors = Colors[theme]
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   // Animations
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const scaleAnim = useRef(new Animated.Value(0.95)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const slideAnim = useRef(new Animated.Value(50)).current
+  const scaleAnim = useRef(new Animated.Value(0.95)).current
+  const shakeAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     // Entrance animation
@@ -58,8 +58,9 @@ export default function SignIn() {
         friction: 7,
         useNativeDriver: true,
       }),
-    ]).start();
-  }, []);
+    ]).start()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Shake animation for errors
   useEffect(() => {
@@ -69,52 +70,48 @@ export default function SignIn() {
         Animated.timing(shakeAnim, { toValue: -10, duration: 100, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: 10, duration: 100, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: 0, duration: 100, useNativeDriver: true }),
-      ]).start();
+      ]).start()
     }
-  }, [error]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error])
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
-      setError('Veuillez remplir tous les champs');
-      return;
+      setError('Veuillez remplir tous les champs')
+      return
     }
 
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
-    const result = await signIn({ email: email.trim(), password });
+    const result = await signIn({ email: email.trim(), password })
 
-    setLoading(false);
+    setLoading(false)
 
     if (result.success) {
-      router.replace('/');
+      router.replace('/')
     } else {
-      setError(result.message || 'Email ou mot de passe incorrect');
+      setError(result.message || 'Email ou mot de passe incorrect')
     }
-  };
+  }
 
-  const styles = createStyles(colors);
-  const behaviour = useBehavior();
-  const tintColor = useThemeColor({}, 'tint');
+  const styles = createStyles(colors)
+  const behaviour = useBehavior()
+  const tintColor = useThemeColor({}, 'tint')
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={behaviour}>
+    <KeyboardAvoidingView style={styles.container} behavior={behaviour}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
-        
+        showsVerticalScrollIndicator={false}
+      >
         <Animated.View
           style={[
             styles.content,
             {
               opacity: fadeAnim,
-              transform: [
-                { translateY: slideAnim },
-                { scale: scaleAnim },
-              ],
+              transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
             },
           ]}
         >
@@ -139,8 +136,8 @@ export default function SignIn() {
               placeholder="votre@email.com"
               value={email}
               onChangeText={(text) => {
-                setEmail(text);
-                setError(null);
+                setEmail(text)
+                setError(null)
               }}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -155,8 +152,8 @@ export default function SignIn() {
                 placeholder="••••••••"
                 value={password}
                 onChangeText={(text) => {
-                  setPassword(text);
-                  setError(null);
+                  setPassword(text)
+                  setError(null)
                 }}
                 secureTextEntry={!showPassword}
                 autoComplete="password"
@@ -184,20 +181,22 @@ export default function SignIn() {
             )}
 
             <TouchableOpacity
-                  className="flex-row items-center justify-center flex-1 py-3 rounded-xl"
-                  style={{ backgroundColor: tintColor, opacity: loading ? 0.6 : 1 }}
-                  onPress={handleSignIn}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#fff" size="small" />
-                  ) : (
-                    <>
-                      <ThemedText style={{ color: '#fff', marginLeft: 8, fontWeight: '600', fontSize: 16 }}>
-                        Se connecter
-                      </ThemedText>
-                    </>
-                  )}
+              className="flex-row items-center justify-center flex-1 py-3 rounded-xl"
+              style={{ backgroundColor: tintColor, opacity: loading ? 0.6 : 1 }}
+              onPress={handleSignIn}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <ThemedText
+                    style={{ color: '#fff', marginLeft: 8, fontWeight: '600', fontSize: 16 }}
+                  >
+                    Se connecter
+                  </ThemedText>
+                </>
+              )}
             </TouchableOpacity>
 
             {/* Footer */}
@@ -214,7 +213,7 @@ export default function SignIn() {
         </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
-  );
+  )
 }
 
 const createStyles = (colors: typeof Colors.light) =>
@@ -309,4 +308,4 @@ const createStyles = (colors: typeof Colors.light) =>
       fontWeight: Typography.weight.semibold,
       textDecorationLine: 'underline',
     },
-  });
+  })
