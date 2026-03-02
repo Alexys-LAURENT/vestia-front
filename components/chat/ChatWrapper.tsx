@@ -42,7 +42,7 @@ export default function ChatWrapper() {
   const { messages, setMessages, error, sendMessage, status } = useChat<MyUIMessage>({
     transport: new DefaultChatTransport({
       fetch: expoFetch as unknown as typeof globalThis.fetch,
-      api: generateAPIUrl('/api/chat'),
+      api: generateAPIUrl('/chatbot/chat'),
       headers: async () => {
         const token = await getStoredToken()
         return {

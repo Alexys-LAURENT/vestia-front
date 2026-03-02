@@ -1,18 +1,18 @@
-import { ThemedText } from '@/components/themed-text';
-import { ITEM_TYPES } from '@/constants/file_types';
-import { Radius, Shadows, Spacing, Typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { Animated, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ThemedText } from '@/components/themed-text'
+import { ITEM_TYPES } from '@/constants/file_types'
+import { Radius, Shadows, Spacing, Typography } from '@/constants/theme'
+import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useThemeColor } from '@/hooks/use-theme-color'
+import { Ionicons } from '@expo/vector-icons'
+import React, { useState } from 'react'
+import { Animated, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 
 interface ItemFiltersProps {
-  search: string;
-  onSearchChange: (search: string) => void;
-  selectedType: string | undefined;
-  onTypeChange: (type: string | undefined) => void;
+  search: string
+  onSearchChange: (search: string) => void
+  selectedType: string | undefined
+  onTypeChange: (type: string | undefined) => void
 }
 
 export const ItemFilters: React.FC<ItemFiltersProps> = ({
@@ -21,16 +21,16 @@ export const ItemFilters: React.FC<ItemFiltersProps> = ({
   selectedType,
   onTypeChange,
 }) => {
-  const backgroundColor = useThemeColor({}, 'backgroundSecondary');
-  const textColor = useThemeColor({}, 'text');
-  const textTertiary = useThemeColor({}, 'textTertiary');
-  const borderColor = useThemeColor({}, 'border');
-  const tintColor = useThemeColor({}, 'tint');
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-  const shadows = Shadows[theme];
+  const backgroundColor = useThemeColor({}, 'backgroundSecondary')
+  const textColor = useThemeColor({}, 'text')
+  const textTertiary = useThemeColor({}, 'textTertiary')
+  const borderColor = useThemeColor({}, 'border')
+  const tintColor = useThemeColor({}, 'tint')
+  const colorScheme = useColorScheme()
+  const theme = colorScheme === 'dark' ? 'dark' : 'light'
+  const shadows = Shadows[theme]
 
-  const [isFocused, setIsFocused] = useState(false);
+  const [isFocused, setIsFocused] = useState(false)
 
   return (
     <View style={styles.container}>
@@ -45,12 +45,7 @@ export const ItemFilters: React.FC<ItemFiltersProps> = ({
           },
         ]}
       >
-        <Ionicons
-          name="search-outline"
-          size={20}
-          color={textTertiary}
-          style={styles.searchIcon}
-        />
+        <Ionicons name="search-outline" size={20} color={textTertiary} style={styles.searchIcon} />
         <TextInput
           style={[
             styles.searchInput,
@@ -107,28 +102,37 @@ export const ItemFilters: React.FC<ItemFiltersProps> = ({
         ))}
       </ScrollView>
     </View>
-  );
-};
+  )
+}
 
 // Separate component for category chips
 const CategoryChip: React.FC<{
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-  tintColor: string;
-  borderColor: string;
-  textColor: string;
-  textTertiary: string;
-  backgroundColor: string;
-}> = ({ label, isActive, onPress, tintColor, borderColor, textColor, textTertiary, backgroundColor }) => {
-  const scaleAnim = React.useRef(new Animated.Value(1)).current;
+  label: string
+  isActive: boolean
+  onPress: () => void
+  tintColor: string
+  borderColor: string
+  textColor: string
+  textTertiary: string
+  backgroundColor: string
+}> = ({
+  label,
+  isActive,
+  onPress,
+  tintColor,
+  borderColor,
+  textColor,
+  textTertiary,
+  backgroundColor,
+}) => {
+  const scaleAnim = React.useRef(new Animated.Value(1)).current
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.95,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
@@ -136,8 +140,8 @@ const CategoryChip: React.FC<{
       tension: 50,
       friction: 3,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   return (
     <TouchableOpacity
@@ -170,8 +174,8 @@ const CategoryChip: React.FC<{
         </ThemedText>
       </Animated.View>
     </TouchableOpacity>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -207,4 +211,4 @@ const styles = StyleSheet.create({
   chipText: {
     letterSpacing: 0.3,
   },
-});
+})

@@ -1,5 +1,4 @@
 import { ITEM_FORMALITIES, ITEM_SEASONS, ITEM_TYPES } from '@/constants/file_types'
-import { PaginatedResponse, SuccessResponse } from './requests'
 
 import type { AxiosInstance } from 'axios'
 import { Item, Look, PlannedOutfit } from './entities'
@@ -13,15 +12,11 @@ export type BackendFetchFn = (
   options?: { method?: string; body?: any }
 ) => Promise<any>
 
-/**
- * Contexte partagé entre tous les tools du chatbot.
- */
-export interface ToolContext {
-  client: AxiosInstance
-  backendFetch: BackendFetchFn
-}
+/*******************/
+/* Types liés aux outils */
+/*******************/
 
-export type WardrobeStatsResponse = SuccessResponse<{
+export type WardrobeStatsResponse = {
   totalItems: number
   byType: Record<(typeof ITEM_TYPES)[number], number>
   bySeason: Record<(typeof ITEM_SEASONS)[number], number>
@@ -34,18 +29,18 @@ export type WardrobeStatsResponse = SuccessResponse<{
   availableTypes: (typeof ITEM_TYPES)[number][]
   availableSeasons: (typeof ITEM_SEASONS)[number][]
   availableFormalities: (typeof ITEM_FORMALITIES)[number][]
-}>
+}
 
-export type SearchItemsResponse = SuccessResponse<{
+export type SearchItemsResponse = {
   items: Item[]
   total: number
-}>
+}
 
-export type SemanticSearchResponse = SuccessResponse<{
+export type SemanticSearchResponse = {
   items: Item & { score: number }[]
-}>
+}
 
-export type GenerateOutfitResponse = SuccessResponse<{
+export type GenerateOutfitResponse = {
   items: Item &
     {
       reason: string // pourquoi ce vêtement a été choisi
@@ -53,9 +48,9 @@ export type GenerateOutfitResponse = SuccessResponse<{
     }[]
   generalReasoning: string
   generationMethod: 'ai' | 'fallback'
-}>
+}
 
-export type SaveLookResponse = SuccessResponse<Look>
+export type SaveLookResponse = { look: Look }
 
 export type DisplayItemsResponse = {
   items: {
@@ -67,15 +62,15 @@ export type DisplayItemsResponse = {
   }[]
 }
 
-export type PlanOutfitResponse = SuccessResponse<PlannedOutfit>
+export type PlanOutfitResponse = { plannedOutfit: PlannedOutfit }
 
-export type GetPlannedOutfitsResponse = SuccessResponse<PlannedOutfit[]>
+export type GetPlannedOutfitsResponse = { plannedOutfits: PlannedOutfit[] }
 
-export type GetLooksResponse = PaginatedResponse<Look>
+export type GetLooksResponse = { looks: Look[]; total: number }
 
-export type GetItemByIdResponse = SuccessResponse<Item>
+export type GetItemByIdResponse = { item: Item }
 
-export type GetLookByIdResponse = SuccessResponse<Look>
+export type GetLookByIdResponse = { look: Look }
 
 export type GeocodeCityResponse = {
   results: {

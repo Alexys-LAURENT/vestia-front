@@ -1,12 +1,11 @@
-import Constants from 'expo-constants';
-//TODO: fix (it may not work in production)
 export const generateAPIUrl = (relativePath: string) => {
-  const path = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+  const path = relativePath.startsWith('/') ? relativePath : `/${relativePath}`
 
-  const hostUri = Constants.expoConfig?.hostUri;
-  if (hostUri) {
-    return `http://${hostUri}${path}`;
+  const baseUrl = process.env.EXPO_PUBLIC_API_URL
+  if (!baseUrl) {
+    throw new Error('EXPO_PUBLIC_API_URL is not defined')
   }
 
-  return `http://localhost:8081${path}`;
-};
+  // Remove trailing slash from base URL if present
+  return `${baseUrl.replace(/\/+$/, '')}${path}`
+}

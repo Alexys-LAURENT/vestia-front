@@ -1,16 +1,3 @@
-import { displayItemsSchema } from '@/tools/displayItemsTool'
-import { generateOutfitSchema } from '@/tools/generateOutfitTool'
-import { geocodeCitySchema } from '@/tools/geocodeCityTool'
-import { getItemByIdSchema } from '@/tools/getItemByIdTool'
-import { getLookByIdSchema } from '@/tools/getLookByIdTool'
-import { getLooksSchema } from '@/tools/getLooksTool'
-import { getPlannedOutfitsSchema } from '@/tools/getPlannedOutfitsTool'
-import { getWeatherSchema } from '@/tools/getWeatherTool'
-import { planOutfitSchema } from '@/tools/planOutfitTool'
-import { saveLookSchema } from '@/tools/saveLookTool'
-import { searchItemsSchema } from '@/tools/searchItemsTool'
-import { semanticSearchSchema } from '@/tools/semanticSearchTool'
-import { wardrobeStatsSchema } from '@/tools/wardrobeStatsTool'
 import { type InferUITools, type ToolSet, type UIMessage, tool } from 'ai'
 import { z } from 'zod'
 import {
@@ -29,58 +16,59 @@ import {
   WardrobeStatsResponse,
 } from './tools'
 
+// WARNING : Reals tools are defined in API, this is only for type inference on the UI side, please keep the schema in sync with the API ones
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const tools = {
   wardrobeStats: tool({
-    inputSchema: wardrobeStatsSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<WardrobeStatsResponse>(),
   }),
   searchItems: tool({
-    inputSchema: searchItemsSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<SearchItemsResponse>(),
   }),
   semanticSearch: tool({
-    inputSchema: semanticSearchSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<SemanticSearchResponse>(),
   }),
   generateOutfit: tool({
-    inputSchema: generateOutfitSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<GenerateOutfitResponse>(),
   }),
   saveLook: tool({
-    inputSchema: saveLookSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<SaveLookResponse>(),
   }),
   displayItems: tool({
-    inputSchema: displayItemsSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<DisplayItemsResponse>(),
   }),
   planOutfit: tool({
-    inputSchema: planOutfitSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<PlanOutfitResponse>(),
   }),
   getPlannedOutfits: tool({
-    inputSchema: getPlannedOutfitsSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<GetPlannedOutfitsResponse>(),
   }),
   getLooks: tool({
-    inputSchema: getLooksSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<GetLooksResponse>(),
   }),
   getItemById: tool({
-    inputSchema: getItemByIdSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<GetItemByIdResponse>(),
   }),
   getLookById: tool({
-    inputSchema: getLookByIdSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<GetLookByIdResponse>(),
   }),
   geocodeCity: tool({
-    inputSchema: geocodeCitySchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<GeocodeCityResponse>(),
   }),
   getWeather: tool({
-    inputSchema: getWeatherSchema,
+    inputSchema: z.object({}),
     outputSchema: z.custom<GetWeatherResponse>(),
   }),
 } satisfies ToolSet
