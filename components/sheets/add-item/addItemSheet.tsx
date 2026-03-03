@@ -3,7 +3,7 @@ import type { ItemFormState } from '@/types/item-analysis'
 import { api } from '@/utils/fetchApiClientSide'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import React, { useCallback, useState } from 'react'
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   AnalyzingStep,
@@ -198,7 +198,7 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
         handleComponent={null}
         enableContentPanningGesture={false}
       >
-        <View style={[styles.contentContainer, { backgroundColor: '#000' }]}>
+        <View className="flex-1" style={{ backgroundColor: '#000' }}>
           {renderContent()}
         </View>
       </Sheet>
@@ -214,14 +214,16 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
       handleComponent={null}
       enableContentPanningGesture={false}
     >
-      <BottomSheetScrollView style={[styles.contentContainer, { backgroundColor }]} bounces={false}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.header}>
+      <BottomSheetScrollView className="flex-1" style={{ backgroundColor }} bounces={false}>
+        <SafeAreaView className="flex-1">
+          <View className="flex-row items-center justify-between px-base py-md border-b border-[rgba(128,128,128,0.2)]">
             <TouchableOpacity onPress={handleClose}>
-              <Text style={[styles.closeButton, { color: tintColor }]}>Annuler</Text>
+              <Text className="text-body" style={{ color: tintColor }}>
+                Annuler
+              </Text>
             </TouchableOpacity>
-            <ThemedText style={styles.headerTitle}>Nouveau vêtement</ThemedText>
-            <View style={styles.headerSpacer} />
+            <ThemedText style={{ fontSize: 18, fontWeight: '600' }}>Nouveau vêtement</ThemedText>
+            <View className="w-[60px]" />
           </View>
 
           {renderContent()}
@@ -230,34 +232,5 @@ const AddItemSheet = ({ isOpen, onClose, onSuccess }: AddItemSheetProps) => {
     </Sheet>
   )
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(128, 128, 128, 0.2)',
-  },
-  closeButton: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  headerSpacer: {
-    width: 60,
-  },
-})
 
 export default AddItemSheet

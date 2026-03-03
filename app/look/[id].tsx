@@ -12,16 +12,7 @@ import { api, FetchApiError } from '@/utils/fetchApiClientSide'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View
-} from 'react-native'
-
+import { ActivityIndicator, Alert, Image, ScrollView, TouchableOpacity, View } from 'react-native'
 
 export default function LookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -98,36 +89,32 @@ export default function LookDetailScreen() {
 
   const handleDeletePlannedOutfit = useCallback(
     (plannedOutfitId: number) => {
-      Alert.alert(
-        'Supprimer',
-        'Voulez-vous supprimer cette planification ?',
-        [
-          {
-            text: 'Annuler',
-            style: 'cancel',
+      Alert.alert('Supprimer', 'Voulez-vous supprimer cette planification ?', [
+        {
+          text: 'Annuler',
+          style: 'cancel',
+        },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            const success = await deletePlannedOutfit(plannedOutfitId)
+            if (success) {
+              Alert.alert('Succès', 'Planification supprimée')
+              loadPlannedOutfits()
+            } else {
+              Alert.alert('Erreur', 'Impossible de supprimer')
+            }
           },
-          {
-            text: 'Supprimer',
-            style: 'destructive',
-            onPress: async () => {
-              const success = await deletePlannedOutfit(plannedOutfitId)
-              if (success) {
-                Alert.alert('Succès', 'Planification supprimée')
-                loadPlannedOutfits()
-              } else {
-                Alert.alert('Erreur', 'Impossible de supprimer')
-              }
-            },
-          },
-        ]
-      )
+        },
+      ])
     },
     [deletePlannedOutfit, loadPlannedOutfits]
   )
 
   if (isLoading) {
     return (
-      <ThemedView style={styles.centered}>
+      <ThemedView className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color={tintColor} />
       </ThemedView>
     )
@@ -139,43 +126,38 @@ export default function LookDetailScreen() {
 
   return (
     <>
-      <View style={[styles.container, { backgroundColor }]}>
+      <View className="flex-1" style={{ backgroundColor }}>
         <Header
           title={look.event || 'Tenue sans événement'}
-          actionComponent={
-            <LookMenuSheetButton
-              lookId={look.idLook}
-              onPlanPress={handlePlan}
-            />
-          }
+          actionComponent={<LookMenuSheetButton lookId={look.idLook} onPlanPress={handlePlan} />}
         />
 
-        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
           {/* Look Preview */}
-          <View style={styles.lookPreview}>
+          <View className="mb-lg">
             <LookCard items={look.items} />
           </View>
 
           {/* Look Info */}
-          <View style={styles.infoSection}>
-            <ThemedText style={styles.sectionTitle}>Informations</ThemedText>
-            <View style={[styles.infoCard, { backgroundColor, borderColor }]}>
-              <View style={styles.infoRow}>
+          <View className="mb-lg">
+            <ThemedText className="text-[18px] font-bold mb-md">Informations</ThemedText>
+            <View className="border rounded-md p-base" style={{ backgroundColor, borderColor }}>
+              <View className="flex-row items-center mb-md">
                 <Ionicons name="shirt-outline" size={20} color={textColor} />
-                <ThemedText style={styles.infoLabel}>Vêtements</ThemedText>
-                <ThemedText style={styles.infoValue}>{look.items.length}</ThemedText>
+                <ThemedText className="flex-1 ml-md text-body-sm">Vêtements</ThemedText>
+                <ThemedText className="text-body-sm font-semibold">{look.items.length}</ThemedText>
               </View>
               {look.event && (
-                <View style={styles.infoRow}>
+                <View className="flex-row items-center mb-md">
                   <Ionicons name="calendar-outline" size={20} color={textColor} />
-                  <ThemedText style={styles.infoLabel}>Événement</ThemedText>
-                  <ThemedText style={styles.infoValue}>{look.event}</ThemedText>
+                  <ThemedText className="flex-1 ml-md text-body-sm">Événement</ThemedText>
+                  <ThemedText className="text-body-sm font-semibold">{look.event}</ThemedText>
                 </View>
               )}
-              <View style={styles.infoRow}>
+              <View className="flex-row items-center mb-md">
                 <Ionicons name="time-outline" size={20} color={textColor} />
-                <ThemedText style={styles.infoLabel}>Créée le</ThemedText>
-                <ThemedText style={styles.infoValue}>
+                <ThemedText className="flex-1 ml-md text-body-sm">Créée le</ThemedText>
+                <ThemedText className="text-body-sm font-semibold">
                   {new Date(look.createdAt).toLocaleDateString('fr-FR')}
                 </ThemedText>
               </View>
@@ -184,19 +166,20 @@ export default function LookDetailScreen() {
 
           {/* Planned Outfits */}
           {plannedOutfits.length > 0 && (
-            <View style={styles.plannedSection}>
-              <ThemedText style={styles.sectionTitle}>
+            <View className="mb-lg">
+              <ThemedText className="text-[18px] font-bold mb-md">
                 Planifications ({plannedOutfits.length})
               </ThemedText>
               {plannedOutfits.map((planned) => (
                 <View
                   key={planned.idPlannedOutfit}
-                  style={[styles.plannedCard, { backgroundColor, borderColor }]}
+                  className="flex-row items-center p-md border rounded-md mb-md"
+                  style={{ backgroundColor, borderColor }}
                 >
-                  <View style={styles.plannedInfo}>
-                    <View style={styles.plannedDateRow}>
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-sm mb-xs">
                       <Ionicons name="calendar" size={18} color={tintColor} />
-                      <ThemedText style={styles.plannedDate}>
+                      <ThemedText className="text-body-sm font-semibold">
                         {new Date(planned.plannedDate).toLocaleDateString('fr-FR', {
                           weekday: 'long',
                           year: 'numeric',
@@ -206,13 +189,13 @@ export default function LookDetailScreen() {
                       </ThemedText>
                     </View>
                     {planned.notes && (
-                      <ThemedText style={styles.plannedNotes} numberOfLines={2}>
+                      <ThemedText className="text-body-sm opacity-70 mt-xs" numberOfLines={2}>
                         {planned.notes}
                       </ThemedText>
                     )}
                   </View>
                   <TouchableOpacity
-                    style={styles.plannedDeleteButton}
+                    className="p-sm"
                     onPress={() => handleDeletePlannedOutfit(planned.idPlannedOutfit)}
                   >
                     <Ionicons name="trash-outline" size={18} color="#ff4444" />
@@ -223,25 +206,28 @@ export default function LookDetailScreen() {
           )}
 
           {/* Items List */}
-          <View style={styles.itemsSection}>
-            <ThemedText style={styles.sectionTitle}>Vêtements ({look.items.length})</ThemedText>
+          <View className="mb-lg">
+            <ThemedText className="text-[18px] font-bold mb-md">
+              Vêtements ({look.items.length})
+            </ThemedText>
             {look.items.map((item) => (
               <TouchableOpacity
                 key={item.idItem}
-                style={[styles.itemCard, { backgroundColor, borderColor }]}
+                className="flex-row items-center p-md border rounded-md mb-md"
+                style={{ backgroundColor, borderColor }}
                 onPress={() => router.push(`/item/${item.idItem}`)}
               >
                 <Image
                   source={{ uri: `${API_URL}${item.imageUrl}` }}
-                  style={styles.itemImage}
+                  className="w-[60px] h-[60px] rounded-[8px]"
                 />
-                <View style={styles.itemInfo}>
-                  <ThemedText style={styles.itemName}>{item.name}</ThemedText>
-                  <ThemedText style={styles.itemType} numberOfLines={1}>
+                <View className="flex-1 ml-md">
+                  <ThemedText className="text-body font-semibold mb-[2px]">{item.name}</ThemedText>
+                  <ThemedText className="text-body-sm opacity-70 mb-[2px]" numberOfLines={1}>
                     {item.type}
                   </ThemedText>
                   {item.brand && (
-                    <ThemedText style={styles.itemBrand} numberOfLines={1}>
+                    <ThemedText className="text-caption opacity-50" numberOfLines={1}>
                       {item.brand}
                     </ThemedText>
                   )}
@@ -262,116 +248,3 @@ export default function LookDetailScreen() {
     </>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 16,
-  },
-  lookPreview: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  infoSection: {
-    marginBottom: 24,
-  },
-  infoCard: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  infoLabel: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 14,
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  plannedSection: {
-    marginBottom: 24,
-  },
-  plannedCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  plannedInfo: {
-    flex: 1,
-  },
-  plannedDateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  plannedDate: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  plannedNotes: {
-    fontSize: 13,
-    opacity: 0.7,
-    marginTop: 4,
-  },
-  plannedDeleteButton: {
-    padding: 8,
-  },
-  itemsSection: {
-    marginBottom: 24,
-  },
-  itemCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  itemImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-  },
-  itemInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  itemName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  itemType: {
-    fontSize: 13,
-    opacity: 0.7,
-    marginBottom: 2,
-  },
-  itemBrand: {
-    fontSize: 12,
-    opacity: 0.5,
-  },
-})

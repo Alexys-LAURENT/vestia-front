@@ -1,16 +1,17 @@
 import { ThemedText } from '@/components/themed-text'
+import { LookCard } from '@/components/wardrobe/LookCard'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { usePlannedOutfits } from '@/hooks/usePlannedOutfits'
 import type { PlannedOutfit } from '@/types/entities'
 import { Ionicons } from '@expo/vector-icons'
-import { useFocusEffect, useRouter } from 'expo-router'
+import { useFocusEffect } from 'expo-router'
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
   FlatList,
-  Image,
   RefreshControl,
   ScrollView,
   TouchableOpacity,
@@ -21,13 +22,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const SCREEN_WIDTH = Dimensions.get('window').width
 
 export default function CalendarScreen() {
+  const isDark = useColorScheme() === 'dark'
   const backgroundColor = useThemeColor({}, 'background')
   const textColor = useThemeColor({}, 'text')
   const tintColor = useThemeColor({}, 'tint')
+  const selectedTextColor = isDark ? '#0A0A0A' : '#FFFFFF'
   const borderColor = useThemeColor({}, 'border')
   const mutedColor = `${textColor}80`
-  const API_URL = process.env.EXPO_PUBLIC_API_URL
-  const router = useRouter()
 
   const [plannedOutfits, setPlannedOutfits] = useState<PlannedOutfit[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -64,29 +65,25 @@ export default function CalendarScreen() {
 
   const handleDelete = useCallback(
     (id: number) => {
-      Alert.alert(
-        'Supprimer',
-        'Voulez-vous vraiment supprimer cette tenue planifiée ?',
-        [
-          {
-            text: 'Annuler',
-            style: 'cancel',
+      Alert.alert('Supprimer', 'Voulez-vous vraiment supprimer cette tenue planifiée ?', [
+        {
+          text: 'Annuler',
+          style: 'cancel',
+        },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            const success = await deletePlannedOutfit(id)
+            if (success) {
+              setPlannedOutfits((prev) => prev.filter((outfit) => outfit.idPlannedOutfit !== id))
+              Alert.alert('Succès', 'Tenue planifiée supprimée')
+            } else {
+              Alert.alert('Erreur', 'Impossible de supprimer la tenue planifiée')
+            }
           },
-          {
-            text: 'Supprimer',
-            style: 'destructive',
-            onPress: async () => {
-              const success = await deletePlannedOutfit(id)
-              if (success) {
-                setPlannedOutfits((prev) => prev.filter((outfit) => outfit.idPlannedOutfit !== id))
-                Alert.alert('Succès', 'Tenue planifiée supprimée')
-              } else {
-                Alert.alert('Erreur', 'Impossible de supprimer la tenue planifiée')
-              }
-            },
-          },
-        ]
-      )
+        },
+      ])
     },
     [deletePlannedOutfit]
   )
@@ -165,7 +162,7 @@ export default function CalendarScreen() {
           style={{
             fontSize: 10,
             fontWeight: '600',
-            color: isSelected ? '#fff' : mutedColor,
+            color: isSelected ? selectedTextColor : mutedColor,
             textTransform: 'capitalize',
           }}
         >
@@ -175,7 +172,7 @@ export default function CalendarScreen() {
           style={{
             fontSize: 16,
             fontWeight: 'bold',
-            color: isSelected ? '#fff' : textColor,
+            color: isSelected ? selectedTextColor : textColor,
             marginTop: 1,
           }}
         >
@@ -195,7 +192,7 @@ export default function CalendarScreen() {
                 width: 4,
                 height: 4,
                 borderRadius: 2,
-                backgroundColor: isSelected ? '#fff' : tintColor,
+                backgroundColor: isSelected ? selectedTextColor : tintColor,
               }}
             />
           )}
@@ -204,84 +201,14 @@ export default function CalendarScreen() {
     )
   }
 
-  const renderOutfitCard = ({ item }: { item: PlannedOutfit }) => {
-    const previewItems = item.look.items.slice(0, 4)
-
-    return (
-      <TouchableOpacity
-        style={{
-          backgroundColor,
-          borderColor,
-          borderWidth: 1,
-          borderRadius: 16,
-          marginBottom: 16,
-          overflow: 'hidden',
-        }}
-        onPress={() => router.push(`/look/${item.idLook}`)}
-        activeOpacity={0.7}
-      >
-        {/* Image Grid */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {previewItems.map((previewItem, index) => (
-            <Image
-              key={previewItem.idItem}
-              source={{ uri: `${API_URL}${previewItem.imageUrl}` }}
-              style={{
-                width: SCREEN_WIDTH / 2 - 17,
-                height: SCREEN_WIDTH / 2 - 17,
-              }}
-              resizeMode="cover"
-            />
-          ))}
-          {previewItems.length < 4 &&
-            Array.from({ length: 4 - previewItems.length }).map((_, i) => (
-              <View
-                key={`empty-${i}`}
-                style={{
-                  width: SCREEN_WIDTH / 2 - 17,
-                  height: SCREEN_WIDTH / 2 - 17,
-                  backgroundColor: borderColor + '20',
-                }}
-              />
-            ))}
-        </View>
-
-        {/* Info Footer */}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: 12,
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <ThemedText style={{ fontSize: 14, fontWeight: '600' }}>
-              {item.look.event || 'Tenue sans événement'}
-            </ThemedText>
-            {item.notes && (
-              <ThemedText
-                style={{ fontSize: 12, color: mutedColor, marginTop: 2 }}
-                numberOfLines={1}
-              >
-                {item.notes}
-              </ThemedText>
-            )}
-          </View>
-          <TouchableOpacity
-            onPress={() => handleDelete(item.idPlannedOutfit)}
-            style={{
-              padding: 8,
-              borderRadius: 8,
-            }}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="trash-outline" size={20} color="#ff4444" />
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    )
-  }
+  const renderOutfitCard = ({ item }: { item: PlannedOutfit }) => (
+    <LookCard
+      look={item.look}
+      notes={item.notes}
+      onDelete={() => handleDelete(item.idPlannedOutfit)}
+      fullWidth
+    />
+  )
 
   const renderEmpty = () => (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 48 }}>
@@ -338,7 +265,7 @@ export default function CalendarScreen() {
             }}
             disabled={isToday(selectedDate)}
           >
-            <ThemedText style={{ fontSize: 14, fontWeight: '600', color: '#fff' }}>
+            <ThemedText style={{ fontSize: 14, fontWeight: '600', color: selectedTextColor }}>
               Aujourd&apos;hui
             </ThemedText>
           </TouchableOpacity>
@@ -372,7 +299,12 @@ export default function CalendarScreen() {
             data={filteredOutfits}
             renderItem={renderOutfitCard}
             keyExtractor={(item) => item.idPlannedOutfit.toString()}
-            contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingTop: 16,
+              paddingBottom: 32,
+              flexGrow: 1,
+            }}
             ListEmptyComponent={renderEmpty}
             refreshControl={
               <RefreshControl

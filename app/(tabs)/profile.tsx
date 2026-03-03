@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text'
 import { Input } from '@/components/ui/input'
 import { PASSWORD_REGEX } from '@/constants/auth'
-import { Animation, Colors, Radius, Shadows, Spacing, Typography } from '@/constants/theme'
+import { Animation, Colors, Shadows, Spacing, Typography } from '@/constants/theme'
 import { useSession } from '@/contexts/SessionContext'
 import { useBehavior } from '@/hooks/use-behavior'
 import { useColorScheme } from '@/hooks/use-color-scheme'
@@ -16,7 +16,6 @@ import {
   KeyboardAvoidingView,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -80,6 +79,7 @@ const isValidBirthDate = (date: string): boolean => {
 export default function ProfileScreen() {
   const { session, signOut, updateSession } = useSession()
   const colorScheme = useColorScheme()
+  const isDark = colorScheme === 'dark'
   const theme = colorScheme === 'dark' ? 'dark' : 'light'
   const colors = Colors[theme]
   const shadows = Shadows[theme]
@@ -452,23 +452,26 @@ export default function ProfileScreen() {
   }
 
   // ─── Styles ─────────────────────────────────────────
-  const styles = createStyles(colors, shadows)
-
   // ─── Initials avatar ────────────────────────────────
   const initials =
     (session?.firstName?.[0] ?? '').toUpperCase() + (session?.lastName?.[0] ?? '').toUpperCase()
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView className="flex-1 bg-light-background dark:bg-dark-background" edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={behaviour}>
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: Spacing.lg,
+            paddingTop: Spacing.lg,
+            paddingBottom: Spacing['4xl'],
+          }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <Animated.View
             style={[
-              styles.content,
+              { width: '100%', maxWidth: 480, alignSelf: 'center' },
               {
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }],
@@ -476,37 +479,73 @@ export default function ProfileScreen() {
             ]}
           >
             {/* ─── Header / Avatar ─────────────────── */}
-            <View style={styles.header}>
-              <View style={styles.avatarContainer}>
-                <View style={[styles.avatar, { backgroundColor: colors.accentAction }]}>
+            <View className="items-center mb-xl">
+              <View className="mb-base">
+                <View
+                  className="w-[80px] h-[80px] rounded-full justify-center items-center"
+                  style={{ backgroundColor: colors.accentAction, ...shadows.md }}
+                >
                   <Text
-                    style={[
-                      styles.avatarText,
-                      { color: theme === 'dark' ? colors.background : '#fff' },
-                    ]}
+                    style={{
+                      fontSize: Typography.size.heading,
+                      fontWeight: Typography.weight.bold,
+                      fontFamily: Typography.family.display,
+                      letterSpacing: 1,
+                      color: theme === 'dark' ? colors.background : '#fff',
+                    }}
                   >
                     {initials || '?'}
                   </Text>
                 </View>
               </View>
-              <Text style={styles.headerName}>
+              <Text
+                style={{
+                  fontSize: Typography.size.subheading,
+                  fontWeight: Typography.weight.semibold,
+                  marginBottom: 2,
+                  color: isDark ? '#FAFAFA' : '#0A0A0A',
+                }}
+              >
                 {session?.firstName} {session?.lastName}
               </Text>
-              <Text style={styles.headerUsername}>@{session?.username}</Text>
+              <Text
+                style={{
+                  letterSpacing: Typography.letterSpacing.wide,
+                  color: isDark ? '#707070' : '#8A8A8A',
+                }}
+              >
+                @{session?.username}
+              </Text>
             </View>
 
             {/* ─── Profile Section ─────────────────── */}
             <Animated.View
-              style={[styles.section, { transform: [{ translateX: profileShakeAnim }] }]}
+              className="mb-xl"
+              style={[{ transform: [{ translateX: profileShakeAnim }] }]}
             >
-              <View style={styles.sectionHeader}>
+              <View className="flex-row items-center gap-sm mb-md">
                 <Ionicons name="person-outline" size={20} color={colors.text} />
-                <Text style={styles.sectionTitle}>Informations personnelles</Text>
+                <Text
+                  className="text-body font-semibold uppercase"
+                  style={{
+                    letterSpacing: Typography.letterSpacing.wide,
+                    color: isDark ? '#FAFAFA' : '#0A0A0A',
+                  }}
+                >
+                  Informations personnelles
+                </Text>
               </View>
 
-              <View style={styles.sectionCard}>
-                <View style={styles.row}>
-                  <View style={styles.halfInput}>
+              <View
+                className="rounded-lg p-lg gap-lg border"
+                style={{
+                  backgroundColor: colors.backgroundSecondary,
+                  borderColor: colors.border,
+                  ...shadows.sm,
+                }}
+              >
+                <View className="flex-row gap-base">
+                  <View className="flex-1">
                     <Input
                       label="Prénom"
                       placeholder="John"
@@ -516,7 +555,7 @@ export default function ProfileScreen() {
                       editable={!profileLoading}
                     />
                   </View>
-                  <View style={styles.halfInput}>
+                  <View className="flex-1">
                     <Input
                       label="Nom"
                       placeholder="Doe"
@@ -528,7 +567,7 @@ export default function ProfileScreen() {
                   </View>
                 </View>
 
-                <View style={styles.usernameContainer}>
+                <View className="relative">
                   <Input
                     label="Nom d'utilisateur"
                     placeholder="johndoe"
@@ -539,9 +578,16 @@ export default function ProfileScreen() {
                     editable={!profileLoading}
                     error={usernameError || undefined}
                   />
-                  <View style={styles.usernameStatus}>{getUsernameStatusIcon()}</View>
+                  <View
+                    className="absolute z-10 right-base"
+                    style={{ top: Spacing.xl + Spacing.sm }}
+                  >
+                    {getUsernameStatusIcon()}
+                  </View>
                   {usernameStatus === 'available' && (
-                    <Text style={styles.fieldSuccess}>✓ Disponible</Text>
+                    <Text className="text-caption font-medium mt-xs text-[#22c55e]">
+                      ✓ Disponible
+                    </Text>
                   )}
                 </View>
 
@@ -567,24 +613,29 @@ export default function ProfileScreen() {
                 />
 
                 {profileError && (
-                  <View style={styles.errorContainer}>
+                  <View className="flex-row items-center gap-sm px-md py-sm bg-[#FEE2E2] rounded-sm border border-[#FECACA]">
                     <Ionicons name="alert-circle-outline" size={16} color="#DC2626" />
-                    <Text style={styles.errorText}>{profileError}</Text>
+                    <Text className="flex-1 text-[#DC2626] text-caption font-medium">
+                      {profileError}
+                    </Text>
                   </View>
                 )}
 
                 {profileSuccess && (
-                  <View style={styles.successContainer}>
+                  <View className="flex-row items-center gap-sm px-md py-sm bg-[#D1FAE5] rounded-sm border border-[#A7F3D0]">
                     <Ionicons name="checkmark-circle-outline" size={16} color={colors.success} />
-                    <Text style={[styles.successText, { color: colors.success }]}>
+                    <Text
+                      className="flex-1 text-caption font-medium"
+                      style={{ color: colors.success }}
+                    >
                       {profileSuccess}
                     </Text>
                   </View>
                 )}
 
                 <TouchableOpacity
+                  className="flex-row items-center justify-center py-md rounded-md"
                   style={[
-                    styles.primaryButton,
                     {
                       backgroundColor: tintColor,
                       opacity:
@@ -598,9 +649,17 @@ export default function ProfileScreen() {
                   activeOpacity={0.7}
                 >
                   {profileLoading ? (
-                    <ActivityIndicator color="#fff" size="small" />
+                    <ActivityIndicator color={isDark ? '#0A0A0A' : '#fff'} size="small" />
                   ) : (
-                    <ThemedText style={styles.primaryButtonText}>Enregistrer</ThemedText>
+                    <ThemedText
+                      style={{
+                        color: isDark ? '#0A0A0A' : '#fff',
+                        fontWeight: Typography.weight.semibold,
+                        fontSize: Typography.size.body,
+                      }}
+                    >
+                      Enregistrer
+                    </ThemedText>
                   )}
                 </TouchableOpacity>
               </View>
@@ -608,15 +667,31 @@ export default function ProfileScreen() {
 
             {/* ─── Password Section ────────────────── */}
             <Animated.View
-              style={[styles.section, { transform: [{ translateX: passwordShakeAnim }] }]}
+              className="mb-xl"
+              style={[{ transform: [{ translateX: passwordShakeAnim }] }]}
             >
-              <View style={styles.sectionHeader}>
+              <View className="flex-row items-center gap-sm mb-md">
                 <Ionicons name="lock-closed-outline" size={20} color={colors.text} />
-                <Text style={styles.sectionTitle}>Modifier le mot de passe</Text>
+                <Text
+                  className="text-body font-semibold uppercase"
+                  style={{
+                    letterSpacing: Typography.letterSpacing.wide,
+                    color: isDark ? '#FAFAFA' : '#0A0A0A',
+                  }}
+                >
+                  Modifier le mot de passe
+                </Text>
               </View>
 
-              <View style={styles.sectionCard}>
-                <View style={styles.passwordWrapper}>
+              <View
+                className="rounded-lg p-lg gap-lg border"
+                style={{
+                  backgroundColor: colors.backgroundSecondary,
+                  borderColor: colors.border,
+                  ...shadows.sm,
+                }}
+              >
+                <View className="relative">
                   <Input
                     label="Mot de passe actuel"
                     placeholder="••••••••"
@@ -632,7 +707,8 @@ export default function ProfileScreen() {
                   />
                   <Pressable
                     onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                    style={styles.eyeButton}
+                    className="absolute z-10 right-base"
+                    style={{ top: Spacing.xl + Spacing.sm }}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
                     <Ionicons
@@ -643,7 +719,7 @@ export default function ProfileScreen() {
                   </Pressable>
                 </View>
 
-                <View style={styles.passwordWrapper}>
+                <View className="relative">
                   <Input
                     label="Nouveau mot de passe"
                     placeholder="••••••••"
@@ -656,7 +732,8 @@ export default function ProfileScreen() {
                   />
                   <Pressable
                     onPress={() => setShowNewPassword(!showNewPassword)}
-                    style={styles.eyeButton}
+                    className="absolute z-10 right-base"
+                    style={{ top: Spacing.xl + Spacing.sm }}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
                     <Ionicons
@@ -666,7 +743,7 @@ export default function ProfileScreen() {
                     />
                   </Pressable>
                   {!newPasswordFieldError && passwordForm.newPassword.length === 0 && (
-                    <Text style={[styles.hint, { color: colors.textTertiary }]}>
+                    <Text className="text-caption mt-xs" style={{ color: colors.textTertiary }}>
                       Min. 6 caractères, 1 majuscule, 1 chiffre
                     </Text>
                   )}
@@ -684,24 +761,29 @@ export default function ProfileScreen() {
                 />
 
                 {passwordError && (
-                  <View style={styles.errorContainer}>
+                  <View className="flex-row items-center gap-sm px-md py-sm bg-[#FEE2E2] rounded-sm border border-[#FECACA]">
                     <Ionicons name="alert-circle-outline" size={16} color="#DC2626" />
-                    <Text style={styles.errorText}>{passwordError}</Text>
+                    <Text className="flex-1 text-[#DC2626] text-caption font-medium">
+                      {passwordError}
+                    </Text>
                   </View>
                 )}
 
                 {passwordSuccess && (
-                  <View style={styles.successContainer}>
+                  <View className="flex-row items-center gap-sm px-md py-sm bg-[#D1FAE5] rounded-sm border border-[#A7F3D0]">
                     <Ionicons name="checkmark-circle-outline" size={16} color={colors.success} />
-                    <Text style={[styles.successText, { color: colors.success }]}>
+                    <Text
+                      className="flex-1 text-caption font-medium"
+                      style={{ color: colors.success }}
+                    >
                       {passwordSuccess}
                     </Text>
                   </View>
                 )}
 
                 <TouchableOpacity
+                  className="flex-row items-center justify-center py-md rounded-md"
                   style={[
-                    styles.primaryButton,
                     {
                       backgroundColor: tintColor,
                       opacity: passwordLoading || !isPasswordFormValid() ? 0.45 : 1,
@@ -712,9 +794,15 @@ export default function ProfileScreen() {
                   activeOpacity={0.7}
                 >
                   {passwordLoading ? (
-                    <ActivityIndicator color="#fff" size="small" />
+                    <ActivityIndicator color={isDark ? '#0A0A0A' : '#fff'} size="small" />
                   ) : (
-                    <ThemedText style={styles.primaryButtonText}>
+                    <ThemedText
+                      style={{
+                        color: isDark ? '#0A0A0A' : '#fff',
+                        fontWeight: Typography.weight.semibold,
+                        fontSize: Typography.size.body,
+                      }}
+                    >
                       Modifier le mot de passe
                     </ThemedText>
                   )}
@@ -724,12 +812,15 @@ export default function ProfileScreen() {
 
             {/* ─── Sign out ────────────────────────── */}
             <TouchableOpacity
-              style={[styles.signOutButton, { borderColor: colors.error }]}
+              className="flex-row items-center justify-center gap-sm py-md rounded-md border-[1.5px] mt-sm"
+              style={{ borderColor: colors.error }}
               onPress={signOut}
               activeOpacity={0.7}
             >
               <Ionicons name="log-out-outline" size={20} color={colors.error} />
-              <Text style={[styles.signOutText, { color: colors.error }]}>Déconnexion</Text>
+              <Text className="text-body font-semibold" style={{ color: colors.error }}>
+                Déconnexion
+              </Text>
             </TouchableOpacity>
           </Animated.View>
         </ScrollView>
@@ -737,185 +828,3 @@ export default function ProfileScreen() {
     </SafeAreaView>
   )
 }
-
-// ─── Styles ───────────────────────────────────────────────
-const createStyles = (colors: (typeof Colors)['light'], shadows: (typeof Shadows)['light']) =>
-  StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    scrollContent: {
-      flexGrow: 1,
-      paddingHorizontal: Spacing.lg,
-      paddingTop: Spacing.lg,
-      paddingBottom: Spacing['4xl'],
-    },
-    content: {
-      width: '100%',
-      maxWidth: 480,
-      alignSelf: 'center',
-    },
-
-    // Header / Avatar
-    header: {
-      alignItems: 'center',
-      marginBottom: Spacing.xl,
-    },
-    avatarContainer: {
-      marginBottom: Spacing.base,
-    },
-    avatar: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      justifyContent: 'center',
-      alignItems: 'center',
-      ...shadows.md,
-    },
-    avatarText: {
-      fontSize: Typography.size.heading,
-      fontWeight: Typography.weight.bold,
-      fontFamily: Typography.family.display,
-      letterSpacing: 1,
-    },
-    headerName: {
-      fontSize: Typography.size.subheading,
-      fontWeight: Typography.weight.semibold,
-      color: colors.text,
-      marginBottom: 2,
-    },
-    headerUsername: {
-      fontSize: Typography.size.bodySmall,
-      fontWeight: Typography.weight.regular,
-      color: colors.textTertiary,
-      letterSpacing: Typography.letterSpacing.wide,
-    },
-
-    // Sections
-    section: {
-      marginBottom: Spacing.xl,
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.sm,
-      marginBottom: Spacing.md,
-    },
-    sectionTitle: {
-      fontSize: Typography.size.body,
-      fontWeight: Typography.weight.semibold,
-      color: colors.text,
-      letterSpacing: Typography.letterSpacing.wide,
-      textTransform: 'uppercase',
-    },
-    sectionCard: {
-      backgroundColor: colors.backgroundSecondary,
-      borderRadius: Radius.lg,
-      padding: Spacing.lg,
-      gap: Spacing.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      ...shadows.sm,
-    },
-
-    // Form
-    row: {
-      flexDirection: 'row',
-      gap: Spacing.base,
-    },
-    halfInput: {
-      flex: 1,
-    },
-    usernameContainer: {
-      position: 'relative',
-    },
-    usernameStatus: {
-      position: 'absolute',
-      right: Spacing.base,
-      top: Spacing.xl + Spacing.sm,
-      zIndex: 10,
-    },
-    fieldSuccess: {
-      fontSize: Typography.size.caption,
-      color: '#22c55e',
-      marginTop: Spacing.xs,
-      fontWeight: Typography.weight.medium,
-    },
-    passwordWrapper: {
-      position: 'relative',
-    },
-    eyeButton: {
-      position: 'absolute',
-      right: Spacing.base,
-      top: Spacing.xl + Spacing.sm,
-      zIndex: 10,
-    },
-    hint: {
-      fontSize: Typography.size.caption,
-      marginTop: Spacing.xs,
-    },
-
-    // Feedback
-    errorContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.sm,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.sm,
-      backgroundColor: '#FEE2E2',
-      borderRadius: Radius.sm,
-      borderWidth: 1,
-      borderColor: '#FECACA',
-    },
-    errorText: {
-      flex: 1,
-      color: '#DC2626',
-      fontSize: Typography.size.caption,
-      fontWeight: Typography.weight.medium,
-    },
-    successContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.sm,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.sm,
-      backgroundColor: '#D1FAE5',
-      borderRadius: Radius.sm,
-      borderWidth: 1,
-      borderColor: '#A7F3D0',
-    },
-    successText: {
-      flex: 1,
-      fontSize: Typography.size.caption,
-      fontWeight: Typography.weight.medium,
-    },
-
-    // Buttons
-    primaryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: Spacing.md,
-      borderRadius: Radius.md,
-    },
-    primaryButtonText: {
-      color: '#fff',
-      fontWeight: Typography.weight.semibold,
-      fontSize: Typography.size.body,
-    },
-    signOutButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: Spacing.sm,
-      paddingVertical: Spacing.md,
-      borderRadius: Radius.md,
-      borderWidth: 1.5,
-      marginTop: Spacing.sm,
-    },
-    signOutText: {
-      fontSize: Typography.size.body,
-      fontWeight: Typography.weight.semibold,
-    },
-  })

@@ -2,7 +2,7 @@ import { ItemAnalysisResponse } from '@/types/item-analysis'
 import { api } from '@/utils/fetchApiClientSide'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useCallback } from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 import type { ImageSelectorProps } from './types'
 
 export const ImageSelector = ({
@@ -88,53 +88,69 @@ export const ImageSelector = ({
   }, [selectedImage, setFormState, setStep, setErrorMessage, setSelectedImage])
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center items-center p-5">
       {selectedImage && imageUri ? (
-        <View style={styles.selectedImageContainer}>
-          <Image source={{ uri: imageUri }} style={styles.selectedImage} resizeMode="cover" />
-          <View style={styles.changeImageRow}>
-            <TouchableOpacity style={styles.changeImageButton} onPress={onPickImage}>
-              <Text style={styles.changeImageText}>
+        <View className="w-full max-w-[300px] items-center">
+          <Image
+            source={{ uri: imageUri }}
+            style={{ width: '100%', aspectRatio: 1, borderRadius: 20 }}
+            resizeMode="cover"
+          />
+          <View className="flex-row gap-base mt-md">
+            <TouchableOpacity className="p-sm" onPress={onPickImage}>
+              <Text className="text-[#666] text-body-sm underline">
                 <Ionicons name="images-outline" size={14} color="#666" /> Galerie
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.changeImageButton} onPress={onOpenCamera}>
-              <Text style={styles.changeImageText}>
+            <TouchableOpacity className="p-sm" onPress={onOpenCamera}>
+              <Text className="text-[#666] text-body-sm underline">
                 <Ionicons name="camera-outline" size={14} color="#666" /> Caméra
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       ) : (
-        <View style={styles.buttonsContainer}>
+        <View className="flex-row gap-base w-full max-w-[340px]">
           <TouchableOpacity
-            style={[styles.imagePickerButton, { borderColor: tintColor }]}
+            className="flex-1 border-2 border-dashed rounded-[20px] justify-center items-center p-[14px]"
+            style={{ borderColor: tintColor, aspectRatio: 0.85 }}
             onPress={onPickImage}
           >
             <Ionicons
               name="images-outline"
               size={48}
               color={tintColor}
-              style={styles.imagePickerIcon}
+              style={{ marginBottom: 16 }}
             />
-            <Text style={[styles.imagePickerText, { color: textColor }]}>Galerie</Text>
-            <Text style={[styles.imagePickerSubtext, { color: textColor, opacity: 0.6 }]}>
+            <Text
+              className="text-[18px] font-semibold text-center mb-sm"
+              style={{ color: textColor }}
+            >
+              Galerie
+            </Text>
+            <Text className="text-body-sm text-center" style={{ color: textColor, opacity: 0.6 }}>
               Importer depuis la galerie
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.imagePickerButton, { borderColor: tintColor }]}
+            className="flex-1 border-2 border-dashed rounded-[20px] justify-center items-center p-[14px]"
+            style={{ borderColor: tintColor, aspectRatio: 0.85 }}
             onPress={onOpenCamera}
           >
             <Ionicons
               name="camera-outline"
               size={48}
               color={tintColor}
-              style={styles.imagePickerIcon}
+              style={{ marginBottom: 16 }}
             />
-            <Text style={[styles.imagePickerText, { color: textColor }]}>Caméra</Text>
-            <Text style={[styles.imagePickerSubtext, { color: textColor, opacity: 0.6 }]}>
+            <Text
+              className="text-[18px] font-semibold text-center mb-sm"
+              style={{ color: textColor }}
+            >
+              Caméra
+            </Text>
+            <Text className="text-body-sm text-center" style={{ color: textColor, opacity: 0.6 }}>
               Prendre une photo
             </Text>
           </TouchableOpacity>
@@ -142,107 +158,22 @@ export const ImageSelector = ({
       )}
 
       {errorMessage && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{errorMessage}</Text>
+        <View className="mt-base p-md bg-[#fee2e2] rounded-[8px] max-w-[300px] w-full">
+          <Text className="text-[#dc2626] text-center text-body-sm">{errorMessage}</Text>
         </View>
       )}
 
       {selectedImage && (
         <TouchableOpacity
-          style={[styles.validateButton, { backgroundColor: tintColor }]}
+          className="mt-lg py-base px-xl rounded-md w-full max-w-[300px]"
+          style={{ backgroundColor: tintColor }}
           onPress={analyzeImage}
         >
-          <Text style={styles.validateButtonText}>Analyser le vêtement</Text>
+          <Text className="text-white text-body font-semibold text-center">
+            Analyser le vêtement
+          </Text>
         </TouchableOpacity>
       )}
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    gap: 16,
-    width: '100%',
-    maxWidth: 340,
-  },
-  imagePickerButton: {
-    flex: 1,
-    aspectRatio: 0.85,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 14,
-  },
-  imagePickerIcon: {
-    marginBottom: 16,
-  },
-  imagePickerText: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  imagePickerSubtext: {
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  selectedImageContainer: {
-    width: '100%',
-    maxWidth: 300,
-    alignItems: 'center',
-  },
-  selectedImage: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 20,
-  },
-  changeImageRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 12,
-  },
-  changeImageButton: {
-    padding: 8,
-  },
-  changeImageText: {
-    color: '#666',
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
-  validateButton: {
-    marginTop: 24,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    width: '100%',
-    maxWidth: 300,
-  },
-  validateButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  errorContainer: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: '#fee2e2',
-    borderRadius: 8,
-    maxWidth: 300,
-    width: '100%',
-  },
-  errorText: {
-    color: '#dc2626',
-    textAlign: 'center',
-    fontSize: 14,
-  },
-})

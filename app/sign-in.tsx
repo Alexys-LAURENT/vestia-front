@@ -1,9 +1,8 @@
 import { ThemedText } from '@/components/themed-text'
 import { Input } from '@/components/ui/input'
-import { Animation, Colors, Radius, Spacing, Typography } from '@/constants/theme'
+import { Animation, Spacing, Typography } from '@/constants/theme'
 import { useSession } from '@/contexts/SessionContext'
 import { useBehavior } from '@/hooks/use-behavior'
-import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
@@ -14,7 +13,6 @@ import {
   KeyboardAvoidingView,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -22,9 +20,8 @@ import {
 
 export default function SignIn() {
   const { signIn } = useSession()
-  const colorScheme = useColorScheme()
-  const theme = colorScheme === 'dark' ? 'dark' : 'light'
-  const colors = Colors[theme]
+  const tintColor = useThemeColor({}, 'tint')
+  const iconColor = useThemeColor({}, 'icon')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -95,20 +92,26 @@ export default function SignIn() {
     }
   }
 
-  const styles = createStyles(colors)
   const behaviour = useBehavior()
-  const tintColor = useThemeColor({}, 'tint')
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={behaviour}>
+    <KeyboardAvoidingView
+      className="flex-1 bg-light-background dark:bg-dark-background"
+      behavior={behaviour}
+    >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          paddingHorizontal: Spacing.xl,
+          paddingVertical: Spacing['4xl'],
+        }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <Animated.View
           style={[
-            styles.content,
+            { width: '100%', maxWidth: 400, alignSelf: 'center' },
             {
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
@@ -116,16 +119,31 @@ export default function SignIn() {
           ]}
         >
           {/* Logo & Header */}
-          <View style={styles.header}>
-            <Text style={styles.logo}>VESTIA</Text>
-            <View style={styles.divider} />
-            <Text style={styles.subtitle}>Bon retour</Text>
+          <View className="items-center" style={{ marginBottom: Spacing['3xl'] }}>
+            <Text
+              className="mb-base text-light-text-primary dark:text-dark-text-primary"
+              style={{
+                fontFamily: Typography.family.display,
+                fontSize: Typography.size.hero,
+                fontWeight: Typography.weight.black,
+                letterSpacing: Typography.letterSpacing.tight,
+              }}
+            >
+              VESTIA
+            </Text>
+            <View className="w-[60px] h-[2px] mb-lg" style={{ backgroundColor: tintColor }} />
+            <Text
+              className="text-body uppercase text-light-text-tertiary dark:text-dark-text-tertiary"
+              style={{ letterSpacing: Typography.letterSpacing.wide }}
+            >
+              Bon retour
+            </Text>
           </View>
 
           {/* Form */}
           <Animated.View
             style={[
-              styles.form,
+              { gap: Spacing.lg },
               {
                 transform: [{ translateX: shakeAnim }],
               },
@@ -146,7 +164,7 @@ export default function SignIn() {
               error={error && !password ? error : undefined}
             />
 
-            <View style={styles.passwordWrapper}>
+            <View className="relative">
               <Input
                 label="Mot de passe"
                 placeholder="••••••••"
@@ -162,21 +180,22 @@ export default function SignIn() {
               />
               <Pressable
                 onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeButton}
+                className="absolute z-10 right-base"
+                style={{ top: Spacing.xl + Spacing.sm }}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color={colors.icon}
+                  color={iconColor}
                 />
               </Pressable>
             </View>
 
             {error && (
-              <Animated.View style={styles.errorContainer}>
+              <Animated.View className="flex-row items-center gap-sm px-base py-sm bg-[#FEE2E2] rounded-sm border border-[#FECACA]">
                 <Ionicons name="alert-circle-outline" size={18} color="#DC2626" />
-                <Text style={styles.errorText}>{error}</Text>
+                <Text className="flex-1 text-[#DC2626] text-caption font-medium">{error}</Text>
               </Animated.View>
             )}
 
@@ -200,13 +219,17 @@ export default function SignIn() {
             </TouchableOpacity>
 
             {/* Footer */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Pas encore de compte ?</Text>
+            <View className="flex-row justify-center items-center gap-xs mt-xl">
+              <Text className="text-body-sm text-light-text-secondary dark:text-dark-text-secondary">
+                Pas encore de compte ?
+              </Text>
               <Pressable
                 onPress={() => router.push('/register')}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.linkText}>S&apos;inscrire</Text>
+                <Text className="text-body-sm font-semibold underline" style={{ color: tintColor }}>
+                  S&apos;inscrire
+                </Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -215,97 +238,3 @@ export default function SignIn() {
     </KeyboardAvoidingView>
   )
 }
-
-const createStyles = (colors: typeof Colors.light) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    scrollContent: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingHorizontal: Spacing.xl,
-      paddingVertical: Spacing['4xl'],
-    },
-    content: {
-      width: '100%',
-      maxWidth: 400,
-      alignSelf: 'center',
-    },
-    header: {
-      alignItems: 'center',
-      marginBottom: Spacing['3xl'],
-    },
-    logo: {
-      fontFamily: Typography.family.display,
-      fontSize: Typography.size.hero,
-      fontWeight: Typography.weight.black,
-      color: colors.text,
-      letterSpacing: Typography.letterSpacing.tight,
-      marginBottom: Spacing.base,
-    },
-    divider: {
-      width: 60,
-      height: 2,
-      backgroundColor: colors.tint,
-      marginBottom: Spacing.lg,
-    },
-    subtitle: {
-      fontSize: Typography.size.body,
-      fontWeight: Typography.weight.regular,
-      color: colors.textTertiary,
-      letterSpacing: Typography.letterSpacing.wide,
-      textTransform: 'uppercase',
-    },
-    form: {
-      gap: Spacing.lg,
-    },
-    passwordWrapper: {
-      position: 'relative',
-    },
-    eyeButton: {
-      position: 'absolute',
-      right: Spacing.base,
-      top: Spacing.xl + Spacing.sm, // Align with input center (label + padding)
-      zIndex: 10,
-    },
-    errorContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.sm,
-      paddingHorizontal: Spacing.base,
-      paddingVertical: Spacing.sm,
-      backgroundColor: '#FEE2E2',
-      borderRadius: Radius.sm,
-      borderWidth: 1,
-      borderColor: '#FECACA',
-    },
-    errorText: {
-      flex: 1,
-      color: '#DC2626',
-      fontSize: Typography.size.caption,
-      fontWeight: Typography.weight.medium,
-    },
-    signInButton: {
-      marginTop: Spacing.base,
-    },
-    footer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: Spacing.xs,
-      marginTop: Spacing.xl,
-    },
-    footerText: {
-      color: colors.textSecondary,
-      fontSize: Typography.size.bodySmall,
-      fontWeight: Typography.weight.regular,
-    },
-    linkText: {
-      color: colors.tint,
-      fontSize: Typography.size.bodySmall,
-      fontWeight: Typography.weight.semibold,
-      textDecorationLine: 'underline',
-    },
-  })

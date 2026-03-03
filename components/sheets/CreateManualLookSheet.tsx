@@ -5,9 +5,9 @@ import type { Item } from '@/types/entities'
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Sheet, useSheetRef } from './Sheet'
+import { ActivityIndicator, Alert, Dimensions, Image, TouchableOpacity, View } from 'react-native'
 import PickItemsSheet from './PickItemsSheet'
+import { Sheet, useSheetRef } from './Sheet'
 
 interface CreateManualLookSheetProps {
   isOpen: boolean
@@ -78,10 +78,7 @@ export const CreateManualLookSheet: React.FC<CreateManualLookSheetProps> = ({
   return (
     <>
       <Sheet ref={sheetRef} onDismiss={handleClose} snapPoints={['85%']}>
-        <BottomSheetScrollView
-          style={[styles.container, { backgroundColor }]}
-          contentContainerStyle={styles.contentContainer}
-        >
+        <BottomSheetScrollView style={{ backgroundColor }} contentContainerStyle={{ padding: 24 }}>
           <ThemedText className="text-2xl font-bold mb-6">Créer une tenue</ThemedText>
 
           {/* Selected Items Grid */}
@@ -103,15 +100,31 @@ export const CreateManualLookSheet: React.FC<CreateManualLookSheetProps> = ({
             </View>
 
             {selectedItems.length > 0 ? (
-              <View style={styles.itemsGrid}>
+              <View className="flex-row flex-wrap gap-md">
                 {selectedItems.map((item) => (
-                  <View key={item.idItem} style={styles.itemContainer}>
+                  <View key={item.idItem} className="items-center">
                     <Image
                       source={{ uri: `${API_URL}${item.imageUrl}` }}
-                      style={[styles.itemImage, { borderColor }]}
+                      style={{
+                        width: ITEM_SIZE,
+                        height: ITEM_SIZE,
+                        borderRadius: 12,
+                        borderWidth: 2,
+                        borderColor,
+                      }}
                     />
                     <TouchableOpacity
-                      style={[styles.removeButton, { backgroundColor: '#ff4444' }]}
+                      className="absolute w-[24px] h-[24px] rounded-full items-center justify-center"
+                      style={{
+                        backgroundColor: '#ff4444',
+                        top: -6,
+                        right: -6,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                      }}
                       onPress={() => handleRemoveItem(item.idItem)}
                     >
                       <Ionicons name="close" size={16} color="#fff" />
@@ -128,7 +141,8 @@ export const CreateManualLookSheet: React.FC<CreateManualLookSheetProps> = ({
               </View>
             ) : (
               <TouchableOpacity
-                style={[styles.emptyState, { borderColor }]}
+                className="items-center justify-center p-5 border-2 rounded-[16px] border-dashed"
+                style={{ height: 200, borderColor }}
                 onPress={handleSelectItems}
               >
                 <Ionicons name="shirt-outline" size={48} color={borderColor} />
@@ -142,7 +156,10 @@ export const CreateManualLookSheet: React.FC<CreateManualLookSheetProps> = ({
             )}
 
             {selectedItems.length > 0 && selectedItems.length < 2 && (
-              <View className="flex-row items-center mt-2 px-3 py-2 rounded-lg" style={{ backgroundColor: `${tintColor}20` }}>
+              <View
+                className="flex-row items-center mt-2 px-3 py-2 rounded-lg"
+                style={{ backgroundColor: `${tintColor}20` }}
+              >
                 <Ionicons name="information-circle" size={16} color={tintColor} />
                 <ThemedText className="text-xs ml-2" style={{ color: tintColor }}>
                   Sélectionnez au moins 2 vêtements pour créer une tenue
@@ -153,18 +170,17 @@ export const CreateManualLookSheet: React.FC<CreateManualLookSheetProps> = ({
 
           {/* Event Name */}
           <View className="mb-6">
-            <ThemedText className="text-base font-semibold mb-2">
-              Événement (optionnel)
-            </ThemedText>
+            <ThemedText className="text-base font-semibold mb-2">Événement (optionnel)</ThemedText>
             <BottomSheetTextInput
-              style={[
-                styles.eventInput,
-                {
-                  backgroundColor,
-                  color: textColor,
-                  borderColor,
-                },
-              ]}
+              style={{
+                borderWidth: 1,
+                borderRadius: 12,
+                padding: 16,
+                fontSize: 16,
+                backgroundColor,
+                color: textColor,
+                borderColor,
+              }}
               placeholder="Ex: Travail, Soirée, Sport..."
               placeholderTextColor={`${textColor}80`}
               value={event}
@@ -187,16 +203,17 @@ export const CreateManualLookSheet: React.FC<CreateManualLookSheetProps> = ({
 
             <TouchableOpacity
               className="flex-1 py-3 rounded-xl"
-              style={{ backgroundColor: tintColor, opacity: selectedItems.length < 2 || isLoading ? 0.5 : 1 }}
+              style={{
+                backgroundColor: tintColor,
+                opacity: selectedItems.length < 2 || isLoading ? 0.5 : 1,
+              }}
               onPress={handleCreate}
               disabled={selectedItems.length < 2 || isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <ThemedText className="text-center text-white font-semibold">
-                  Créer
-                </ThemedText>
+                <ThemedText className="text-center text-white font-semibold">Créer</ThemedText>
               )}
             </TouchableOpacity>
           </View>
@@ -213,56 +230,3 @@ export const CreateManualLookSheet: React.FC<CreateManualLookSheetProps> = ({
     </>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 24,
-  },
-  itemsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  itemContainer: {
-    alignItems: 'center',
-  },
-  itemImage: {
-    width: ITEM_SIZE,
-    height: ITEM_SIZE,
-    borderRadius: 12,
-    borderWidth: 2,
-  },
-  removeButton: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  emptyState: {
-    height: 200,
-    borderWidth: 2,
-    borderRadius: 16,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  eventInput: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-  },
-})

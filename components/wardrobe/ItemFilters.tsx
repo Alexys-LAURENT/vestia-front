@@ -1,11 +1,11 @@
 import { ThemedText } from '@/components/themed-text'
 import { ITEM_TYPES } from '@/constants/file_types'
-import { Radius, Shadows, Spacing, Typography } from '@/constants/theme'
+import { Shadows, Typography } from '@/constants/theme'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
-import { Animated, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { Animated, TextInput, TouchableOpacity, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 interface ItemFiltersProps {
@@ -33,25 +33,24 @@ export const ItemFilters: React.FC<ItemFiltersProps> = ({
   const [isFocused, setIsFocused] = useState(false)
 
   return (
-    <View style={styles.container}>
+    <View className="gap-md mb-sm">
       {/* Search Bar */}
       <View
-        style={[
-          styles.searchContainer,
-          {
-            backgroundColor,
-            borderColor: isFocused ? tintColor : borderColor,
-            ...shadows.sm,
-          },
-        ]}
+        className="flex-row items-center border rounded-full mx-base px-base h-[48px]"
+        style={{
+          backgroundColor,
+          borderColor: isFocused ? tintColor : borderColor,
+          ...shadows.sm,
+        }}
       >
-        <Ionicons name="search-outline" size={20} color={textTertiary} style={styles.searchIcon} />
+        <Ionicons name="search-outline" size={20} color={textTertiary} style={{ marginRight: 8 }} />
         <TextInput
           style={[
-            styles.searchInput,
             {
+              flex: 1,
               color: textColor,
               fontSize: Typography.size.body,
+              fontWeight: Typography.weight.regular,
             },
           ]}
           placeholder="Rechercher..."
@@ -75,7 +74,7 @@ export const ItemFilters: React.FC<ItemFiltersProps> = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipsContainer}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
       >
         <CategoryChip
           label="Tous"
@@ -151,19 +150,17 @@ const CategoryChip: React.FC<{
       activeOpacity={0.9}
     >
       <Animated.View
-        style={[
-          styles.chip,
-          {
-            backgroundColor: isActive ? tintColor : backgroundColor,
-            borderColor: isActive ? tintColor : borderColor,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
+        className="px-base py-sm rounded-full border"
+        style={{
+          backgroundColor: isActive ? tintColor : backgroundColor,
+          borderColor: isActive ? tintColor : borderColor,
+          transform: [{ scale: scaleAnim }],
+        }}
       >
         <ThemedText
           style={[
-            styles.chipText,
             {
+              letterSpacing: 0.3,
               color: isActive ? backgroundColor : textColor,
               fontSize: Typography.size.caption,
               fontWeight: isActive ? Typography.weight.semibold : Typography.weight.medium,
@@ -176,39 +173,3 @@ const CategoryChip: React.FC<{
     </TouchableOpacity>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: Spacing.md,
-    marginBottom: Spacing.sm,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: Radius.full,
-    marginHorizontal: Spacing.base,
-    paddingHorizontal: Spacing.base,
-    height: 48,
-  },
-  searchIcon: {
-    marginRight: Spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontWeight: Typography.weight.regular,
-  },
-  chipsContainer: {
-    paddingHorizontal: Spacing.base,
-    gap: Spacing.sm,
-  },
-  chip: {
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    borderRadius: Radius.full,
-    borderWidth: 1,
-  },
-  chipText: {
-    letterSpacing: 0.3,
-  },
-})

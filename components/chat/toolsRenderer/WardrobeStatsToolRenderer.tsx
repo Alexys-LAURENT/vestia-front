@@ -1,3 +1,4 @@
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import { MyUIMessage } from '@/types/my_ui_message'
 import { Text, View } from 'react-native'
 
@@ -7,6 +8,8 @@ interface WardrobeStatsToolRendererProps {
 }
 
 export const WardrobeStatsToolRenderer = ({ part, index }: WardrobeStatsToolRendererProps) => {
+  const isDark = useColorScheme() === 'dark'
+
   if (part.state === 'input-streaming' || part.state === 'input-available') {
     return (
       <View
@@ -14,7 +17,7 @@ export const WardrobeStatsToolRenderer = ({ part, index }: WardrobeStatsToolRend
         className="flex-row items-center gap-xs py-xs"
       >
         <Text className="text-caption">📊</Text>
-        <Text className="italic text-caption text-light-text-tertiary dark:text-dark-text-tertiary">
+        <Text className="italic text-caption" style={{ color: isDark ? '#707070' : '#8A8A8A' }}>
           Analyse de la garde-robe...
         </Text>
       </View>
@@ -42,7 +45,7 @@ export const WardrobeStatsToolRenderer = ({ part, index }: WardrobeStatsToolRend
         className="flex-row items-center gap-xs py-xs"
       >
         <Text className="text-caption">✓</Text>
-        <Text className="italic text-caption text-light-text-tertiary dark:text-dark-text-tertiary">
+        <Text className="italic text-caption" style={{ color: isDark ? '#707070' : '#8A8A8A' }}>
           Analyse terminée
         </Text>
       </View>

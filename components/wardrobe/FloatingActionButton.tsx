@@ -1,9 +1,9 @@
-import { Shadows, Spacing } from '@/constants/theme'
+import { Shadows } from '@/constants/theme'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useRef } from 'react'
-import { Animated, StyleSheet, TouchableOpacity } from 'react-native'
+import { Animated, TouchableOpacity } from 'react-native'
 
 interface FloatingActionButtonProps {
   onPress: () => void
@@ -40,37 +40,18 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPr
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       activeOpacity={0.9}
-      style={styles.touchable}
+      className="absolute bottom-xl right-xl w-[64px] h-[64px]"
     >
       <Animated.View
-        style={[
-          styles.button,
-          {
-            backgroundColor: tintColor,
-            ...shadows.xl,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
+        className="w-[64px] h-[64px] rounded-full items-center justify-center"
+        style={{
+          backgroundColor: tintColor,
+          ...shadows.xl,
+          transform: [{ scale: scaleAnim }],
+        }}
       >
         <Ionicons name="add" size={32} color={backgroundColor} />
       </Animated.View>
     </TouchableOpacity>
   )
 }
-
-const styles = StyleSheet.create({
-  touchable: {
-    position: 'absolute',
-    bottom: Spacing.xl,
-    right: Spacing.xl,
-    width: 64,
-    height: 64,
-  },
-  button: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-})

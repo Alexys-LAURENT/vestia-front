@@ -2,7 +2,7 @@ import { useThemeColor } from '@/hooks/use-theme-color'
 import { Ionicons } from '@expo/vector-icons'
 import { CameraView, useCameraPermissions, type CameraType } from 'expo-camera'
 import React, { useCallback, useRef, useState } from 'react'
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import type { MediaAssetWithUri } from '../../media-gallery/types/media-gallery.types'
 
@@ -76,75 +76,82 @@ export const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
   // Permissions en cours de chargement
   if (!permission) {
     return (
-      <View style={styles.centered}>
+      <View className="flex-1 justify-center items-center p-[30px]">
         <ActivityIndicator size="large" color={tintColor} />
       </View>
     )
   }
 
-  // Permissions refusées
   if (!permission.granted) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.permissionText}>
+      <View className="flex-1 justify-center items-center p-[30px]">
+        <Text className="text-white text-body text-center mb-5">
           L&apos;accès à la caméra est nécessaire pour prendre des photos.
         </Text>
         {permission.canAskAgain ? (
           <TouchableOpacity
-            style={[styles.permissionButton, { backgroundColor: tintColor }]}
+            className="py-[14px] px-[28px] rounded-md"
+            style={{ backgroundColor: tintColor }}
             onPress={requestPermission}
           >
-            <Text style={styles.permissionButtonText}>Autoriser la caméra</Text>
+            <Text className="text-white text-body font-semibold">Autoriser la caméra</Text>
           </TouchableOpacity>
         ) : (
-          <Text style={styles.permissionSubtext}>
+          <Text className="text-[#aaa] text-body-sm text-center mt-[10px]">
             Veuillez autoriser l&apos;accès dans les réglages de votre appareil.
           </Text>
         )}
-        <TouchableOpacity style={styles.backButton} onPress={onClose}>
-          <Text style={[styles.backButtonText, { color: tintColor }]}>Retour</Text>
+        <TouchableOpacity className="mt-5 p-[10px]" onPress={onClose}>
+          <Text className="text-body font-medium" style={{ color: tintColor }}>
+            Retour
+          </Text>
         </TouchableOpacity>
       </View>
     )
   }
 
   return (
-    <View style={styles.container}>
-      <CameraView
-        ref={cameraRef}
-        style={styles.camera}
-        facing={facing}
-        flash={flash}
-        mode="picture"
-      >
-        <SafeAreaView style={styles.overlay}>
+    <View className="flex-1 bg-black">
+      <CameraView ref={cameraRef} className="flex-1" facing={facing} flash={flash} mode="picture">
+        <SafeAreaView className="flex-1 justify-between">
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.headerButton}>
+          <View className="flex-row justify-between px-5 pt-sm">
+            <TouchableOpacity
+              onPress={onClose}
+              className="w-[44px] h-[44px] rounded-full bg-[rgba(0,0,0,0.4)] justify-center items-center"
+            >
               <Ionicons name="close" size={24} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={toggleFlash} style={styles.headerButton}>
+            <TouchableOpacity
+              onPress={toggleFlash}
+              className="w-[44px] h-[44px] rounded-full bg-[rgba(0,0,0,0.4)] justify-center items-center"
+            >
               <Ionicons name={flashIconName} size={24} color="#fff" />
             </TouchableOpacity>
           </View>
 
           {/* Bottom controls */}
-          <View style={styles.bottomControls}>
+          <View className="flex-row justify-between items-center px-10 pb-[30px]">
             {/* Spacer */}
-            <View style={styles.sideButton} />
+            <View className="w-[44px] h-[44px] justify-center items-center" />
 
             {/* Shutter */}
             <TouchableOpacity
-              style={styles.shutterButton}
+              className="w-[76px] h-[76px] rounded-full border-4 border-white justify-center items-center"
               onPress={takePicture}
               disabled={isTaking}
               activeOpacity={0.7}
             >
-              <View style={[styles.shutterInner, isTaking && styles.shutterTaking]} />
+              <View
+                className={`w-[62px] h-[62px] rounded-full ${isTaking ? 'bg-[#ccc]' : 'bg-white'}`}
+              />
             </TouchableOpacity>
 
             {/* Flip camera */}
-            <TouchableOpacity style={styles.sideButton} onPress={toggleFacing}>
+            <TouchableOpacity
+              className="w-[44px] h-[44px] justify-center items-center"
+              onPress={toggleFacing}
+            >
               <Ionicons name="camera-reverse-outline" size={32} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -153,98 +160,3 @@ export const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  camera: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-  },
-  headerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bottomControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-    paddingBottom: 30,
-  },
-  shutterButton: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    borderWidth: 4,
-    borderColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  shutterInner: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: '#fff',
-  },
-  shutterTaking: {
-    backgroundColor: '#ccc',
-  },
-  sideButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 30,
-  },
-  permissionText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  permissionSubtext: {
-    color: '#aaa',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  permissionButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 12,
-  },
-  permissionButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  backButton: {
-    marginTop: 20,
-    padding: 10,
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-})

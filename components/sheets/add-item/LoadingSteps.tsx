@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text'
 import { LinearGradient } from 'expo-linear-gradient'
 import React, { useEffect } from 'react'
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -31,14 +31,14 @@ export const AnalyzingStep = ({ selectedImage }: AnalyzingStepProps) => {
   }))
 
   return (
-    <View style={styles.container}>
-      <View style={styles.selectedImageContainer} className="relative">
+    <View className="flex-1 justify-center items-center p-5">
+      <View className="w-full max-w-[300px] items-center rounded-[20px] overflow-hidden relative">
         <Animated.Image
           source={{ uri: imageUri }}
-          style={styles.selectedImage}
+          className="w-full aspect-square"
           resizeMode="cover"
         />
-        <Animated.View style={[StyleSheet.absoluteFill, overlayAnimatedStyle]}>
+        <Animated.View className="absolute inset-0" style={overlayAnimatedStyle}>
           <LinearGradient
             colors={['#06b6d4', '#8b5cf6']}
             start={{ x: 0, y: 0 }}
@@ -47,8 +47,10 @@ export const AnalyzingStep = ({ selectedImage }: AnalyzingStepProps) => {
           />
         </Animated.View>
       </View>
-      <ThemedText style={styles.text}>Analyse du vêtement en cours...</ThemedText>
-      <ThemedText style={[styles.subtext, { opacity: 0.6 }]}>
+      <ThemedText className="mt-5 text-[18px] font-semibold text-center">
+        Analyse du vêtement en cours...
+      </ThemedText>
+      <ThemedText className="mt-sm text-body-sm text-center opacity-60">
         L&apos;IA analyse votre vêtement pour pré-remplir les informations
       </ThemedText>
     </View>
@@ -57,40 +59,11 @@ export const AnalyzingStep = ({ selectedImage }: AnalyzingStepProps) => {
 
 export const SubmittingStep = ({ tintColor }: SubmittingStepProps) => {
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center items-center p-5">
       <ActivityIndicator size="large" color={tintColor} />
-      <ThemedText style={styles.text}>Création en cours...</ThemedText>
+      <ThemedText className="mt-5 text-[18px] font-semibold text-center">
+        Création en cours...
+      </ThemedText>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  selectedImageContainer: {
-    width: '100%',
-    maxWidth: 300,
-    alignItems: 'center',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  selectedImage: {
-    width: '100%',
-    aspectRatio: 1,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  text: {
-    marginTop: 20,
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  subtext: {
-    marginTop: 8,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-})

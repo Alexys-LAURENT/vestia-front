@@ -1,9 +1,10 @@
 import { ThemedText } from '@/components/themed-text'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet'
-import React, { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Platform, TouchableOpacity, View } from 'react-native'
 import { Sheet, useSheetRef } from './Sheet'
 
 interface PlanLookSheetProps {
@@ -14,6 +15,7 @@ interface PlanLookSheetProps {
 
 export const PlanLookSheet: React.FC<PlanLookSheetProps> = ({ isOpen, onClose, onConfirm }) => {
   const sheetRef = useSheetRef()
+  const isDark = useColorScheme() === 'dark'
   const backgroundColor = useThemeColor({}, 'background')
   const textColor = useThemeColor({}, 'text')
   const tintColor = useThemeColor({}, 'tint')
@@ -64,8 +66,9 @@ export const PlanLookSheet: React.FC<PlanLookSheetProps> = ({ isOpen, onClose, o
   return (
     <Sheet ref={sheetRef} onDismiss={handleClose} snapPoints={['70%']}>
       <BottomSheetScrollView
-        style={[styles.container, { backgroundColor }]}
-        contentContainerStyle={styles.contentContainer}
+        className="flex-1"
+        style={{ backgroundColor }}
+        contentContainerStyle={{ padding: 24 }}
       >
         <ThemedText className="text-2xl font-bold mb-6">Planifier la tenue</ThemedText>
 
@@ -92,6 +95,7 @@ export const PlanLookSheet: React.FC<PlanLookSheetProps> = ({ isOpen, onClose, o
               minimumDate={new Date()}
               textColor={textColor}
               themeVariant="light"
+              locale="fr-FR"
             />
           )}
         </View>
@@ -100,14 +104,16 @@ export const PlanLookSheet: React.FC<PlanLookSheetProps> = ({ isOpen, onClose, o
         <View className="mb-6">
           <ThemedText className="text-base font-semibold mb-2">Notes (optionnel)</ThemedText>
           <BottomSheetTextInput
-            style={[
-              styles.notesInput,
-              {
-                backgroundColor,
-                color: textColor,
-                borderColor,
-              },
-            ]}
+            style={{
+              borderWidth: 1,
+              borderRadius: 12,
+              padding: 16,
+              minHeight: 100,
+              fontSize: 16,
+              backgroundColor,
+              color: textColor,
+              borderColor,
+            }}
             placeholder="Ex: Entretien important, soirée, etc."
             placeholderTextColor={`${textColor}80`}
             value={notes}
@@ -135,26 +141,15 @@ export const PlanLookSheet: React.FC<PlanLookSheetProps> = ({ isOpen, onClose, o
             style={{ backgroundColor: tintColor }}
             onPress={handleConfirm}
           >
-            <ThemedText className="text-center text-white font-semibold">Planifier</ThemedText>
+            <ThemedText
+              className="text-center font-semibold"
+              style={{ color: isDark ? '#0A0A0A' : '#FFFFFF' }}
+            >
+              Planifier
+            </ThemedText>
           </TouchableOpacity>
         </View>
       </BottomSheetScrollView>
     </Sheet>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 24,
-  },
-  notesInput: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    minHeight: 100,
-    fontSize: 16,
-  },
-})

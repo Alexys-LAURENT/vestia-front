@@ -1,4 +1,5 @@
 import PickItemsSheet from '@/components/sheets/PickItemsSheet'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import type { Item } from '@/types/entities'
 import { AttachedItem, MyUIMessage } from '@/types/my_ui_message'
 import { getStoredToken } from '@/utils/fetchApiClientSide'
@@ -38,6 +39,8 @@ export default function ChatWrapper() {
   const [selectedItems, setSelectedItems] = useState<Item[]>([])
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const API_URL = process.env.EXPO_PUBLIC_API_URL
+  const colorScheme = useColorScheme()
+  const isDark = colorScheme === 'dark'
 
   const { messages, setMessages, error, sendMessage, status } = useChat<MyUIMessage>({
     transport: new DefaultChatTransport({
@@ -118,11 +121,19 @@ export default function ChatWrapper() {
     <View className="items-center justify-center flex-1 px-lg">
       {/* Brand mark */}
       <View className="items-center mb-xl">
-        <Text className="text-[40px] mb-md">✦</Text>
-        <Text className="font-bold tracking-tight text-heading text-light-text-primary dark:text-dark-text-primary">
+        <Text className="text-[40px] mb-md" style={{ color: isDark ? '#FAFAFA' : '#0A0A0A' }}>
+          ✦
+        </Text>
+        <Text
+          className="font-bold tracking-tight text-heading"
+          style={{ color: isDark ? '#FAFAFA' : '#0A0A0A' }}
+        >
           Vestia AI
         </Text>
-        <Text className="text-center text-body-sm text-light-text-tertiary dark:text-dark-text-tertiary mt-xs">
+        <Text
+          className="text-center text-body-sm mt-xs"
+          style={{ color: isDark ? '#707070' : '#8A8A8A' }}
+        >
           Votre styliste personnel intelligent
         </Text>
       </View>
@@ -133,10 +144,14 @@ export default function ChatWrapper() {
           <Pressable
             key={i}
             onPress={() => handleSuggestion(prompt.text)}
-            className="flex-row items-center border rounded-lg bg-light-bg-secondary dark:bg-dark-bg-secondary border-light-ui-border dark:border-dark-ui-border px-base py-md active:opacity-70"
+            style={{
+              backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
+              borderColor: isDark ? '#2F2F2F' : '#E0E0E0',
+            }}
+            className="flex-row items-center border rounded-lg px-base py-md active:opacity-70"
           >
             <Text className="text-[18px] mr-md">{prompt.icon}</Text>
-            <Text className="flex-1 text-body-sm text-light-text-secondary dark:text-dark-text-secondary">
+            <Text className="flex-1 text-body-sm" style={{ color: isDark ? '#B8B8B8' : '#404040' }}>
               {prompt.text}
             </Text>
             <FontAwesome name="angle-right" size={16} color="#8A8A8A" />
@@ -151,16 +166,23 @@ export default function ChatWrapper() {
       {/* Header with new conversation button */}
       {messages.length > 0 && (
         <View className="flex-row items-center justify-between border-b border-light-ui-border dark:border-dark-ui-border px-base py-sm">
-          <Text className="font-semibold text-body text-light-text-primary dark:text-dark-text-primary">
+          <Text
+            className="font-semibold text-body"
+            style={{ color: isDark ? '#FAFAFA' : '#0A0A0A' }}
+          >
             Vestia AI
           </Text>
           <Pressable
             onPress={handleNewConversation}
             disabled={isStreaming}
-            className={`flex-row items-center gap-xs px-md py-xs rounded-full bg-light-bg-tertiary dark:bg-dark-bg-tertiary active:opacity-70 ${isStreaming ? 'opacity-40' : ''}`}
+            style={{ backgroundColor: isDark ? '#252525' : '#F5F5F5' }}
+            className={`flex-row items-center gap-xs px-md py-xs rounded-full active:opacity-70 ${isStreaming ? 'opacity-40' : ''}`}
           >
             <FontAwesome name="plus" size={12} color="#8A8A8A" />
-            <Text className="font-medium text-body-sm text-light-text-secondary dark:text-dark-text-secondary">
+            <Text
+              className="font-medium text-body-sm"
+              style={{ color: isDark ? '#B8B8B8' : '#404040' }}
+            >
               Nouveau
             </Text>
           </Pressable>
@@ -207,7 +229,10 @@ export default function ChatWrapper() {
           {/* Streaming indicator */}
           {isStreaming && (
             <View className="px-base py-xs">
-              <Text className="italic text-caption text-light-text-tertiary dark:text-dark-text-tertiary">
+              <Text
+                className="italic text-caption"
+                style={{ color: isDark ? '#707070' : '#8A8A8A' }}
+              >
                 Vestia réfléchit...
               </Text>
             </View>
@@ -249,7 +274,7 @@ export default function ChatWrapper() {
 
             <View className="flex-1 bg-light-bg-tertiary dark:bg-dark-bg-tertiary rounded-xl px-base py-[10px] min-h-[44px] justify-center">
               <TextInput
-                className="text-body text-light-text-primary dark:text-dark-text-primary"
+                className="text-body"
                 placeholder="Écrivez votre message..."
                 placeholderTextColor="#8A8A8A"
                 value={input}
@@ -257,7 +282,7 @@ export default function ChatWrapper() {
                 onSubmitEditing={handleSend}
                 multiline
                 maxLength={1000}
-                style={{ maxHeight: 100, lineHeight: 20 }}
+                style={{ maxHeight: 100, lineHeight: 20, color: isDark ? '#FAFAFA' : '#0A0A0A' }}
                 returnKeyType="send"
                 blurOnSubmit={false}
               />
@@ -266,16 +291,12 @@ export default function ChatWrapper() {
             <Pressable
               onPress={handleSend}
               disabled={!input.trim() || isStreaming}
-              className={`w-[44px] h-[44px] rounded-full items-center justify-center ${
-                input.trim() && !isStreaming
-                  ? 'bg-light-accent-primary dark:bg-dark-accent-primary'
-                  : 'bg-light-accent-secondary dark:bg-dark-accent-secondary'
-              } active:opacity-70`}
+              className="w-[44px] h-[44px] rounded-full items-center justify-center bg-light-bg-tertiary dark:bg-dark-bg-tertiary active:opacity-70"
             >
               <FontAwesome
                 name="arrow-up"
                 size={16}
-                color={input.trim() && !isStreaming ? '#FFFFFF' : '#8A8A8A'}
+                color={input.trim() && !isStreaming ? (isDark ? '#FAFAFA' : '#1A1A1A') : '#8A8A8A'}
               />
             </Pressable>
           </View>

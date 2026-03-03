@@ -6,7 +6,7 @@ import { usePaginatedFetch } from '@/hooks/usePaginatedFetch'
 import type { Item } from '@/types/entities'
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, RefreshControl, View } from 'react-native'
 import { Sheet, useSheetRef } from './Sheet'
 
 interface EditItemSheetProps {
@@ -114,7 +114,7 @@ const PickItemsSheet = ({
     (isLoadingMore: boolean) => {
       if (!isLoadingMore) return null
       return (
-        <View style={styles.footer}>
+        <View className="py-5 items-center">
           <ActivityIndicator size="small" color={primaryColor} />
         </View>
       )
@@ -126,21 +126,21 @@ const PickItemsSheet = ({
     (isLoading: boolean, error: string | null) => {
       if (isLoading) {
         return (
-          <View style={styles.centered}>
+          <View className="flex-1 justify-center items-center pt-[50px]">
             <ActivityIndicator size="large" color={primaryColor} />
           </View>
         )
       }
       if (error) {
         return (
-          <View style={styles.centered}>
-            <ThemedText style={styles.errorText}>{error}</ThemedText>
+          <View className="flex-1 justify-center items-center pt-[50px]">
+            <ThemedText className="text-semantic-error text-center">{error}</ThemedText>
           </View>
         )
       }
       return (
-        <View style={styles.centered}>
-          <ThemedText style={styles.emptyText}>Aucun vêtement trouvé</ThemedText>
+        <View className="flex-1 justify-center items-center pt-[50px]">
+          <ThemedText className="opacity-60 text-center">Aucun vêtement trouvé</ThemedText>
         </View>
       )
     },
@@ -155,8 +155,13 @@ const PickItemsSheet = ({
       enableDynamicSizing={false}
       stackBehavior="push"
     >
-      <View style={[styles.container, { backgroundColor }]}>
-        <ThemedText style={styles.title}>Ma Garde-robe</ThemedText>
+      <View className="flex-1 flex-col gap-md" style={{ backgroundColor }}>
+        <ThemedText
+          className="text-[28px] font-bold mx-base pt-sm"
+          style={{ fontFamily: 'Georgia' }}
+        >
+          Ma Garde-robe
+        </ThemedText>
 
         <ItemFilters
           search={search}
@@ -170,8 +175,8 @@ const PickItemsSheet = ({
           renderItem={renderItemCard}
           keyExtractor={(item) => String(item.idItem)}
           numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 16 }}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
           onEndReached={loadMoreItems}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() => renderFooter(isLoadingMoreItems)}
@@ -184,46 +189,5 @@ const PickItemsSheet = ({
     </Sheet>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    gap: 12,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginHorizontal: 16,
-    paddingTop: 8,
-    fontFamily: 'Georgia',
-  },
-  row: {
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-  },
-  listContent: {
-    flexGrow: 1,
-    paddingBottom: 100,
-  },
-  footer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 50,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-  },
-  emptyText: {
-    opacity: 0.6,
-    textAlign: 'center',
-  },
-})
 
 export default PickItemsSheet

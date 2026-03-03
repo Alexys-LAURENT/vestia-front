@@ -1,10 +1,9 @@
 import { ThemedText } from '@/components/themed-text'
 import { Input } from '@/components/ui/input'
 import { PASSWORD_REGEX } from '@/constants/auth'
-import { Animation, Colors, Radius, Spacing, Typography } from '@/constants/theme'
+import { Animation, Spacing, Typography } from '@/constants/theme'
 import { useSession } from '@/contexts/SessionContext'
 import { useBehavior } from '@/hooks/use-behavior'
-import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { api, FetchApiError } from '@/utils/fetchApiClientSide'
 import { Ionicons } from '@expo/vector-icons'
@@ -16,7 +15,6 @@ import {
   KeyboardAvoidingView,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -24,9 +22,9 @@ import {
 
 export default function Register() {
   const { register, signIn } = useSession()
-  const colorScheme = useColorScheme()
-  const theme = colorScheme === 'dark' ? 'dark' : 'light'
-  const colors = Colors[theme]
+  const tintColor = useThemeColor({}, 'tint')
+  const iconColor = useThemeColor({}, 'icon')
+  const textTertiary = useThemeColor({}, 'textTertiary')
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -326,30 +324,36 @@ export default function Register() {
   const getUsernameStatusIcon = () => {
     switch (usernameStatus) {
       case 'checking':
-        return <ActivityIndicator size="small" color={colors.icon} />
+        return <ActivityIndicator size="small" color={iconColor} />
       case 'available':
-        return <Text style={styles.statusIcon}>✓</Text>
+        return <Text style={{ fontSize: 18, color: '#22c55e', fontWeight: 'bold' }}>✓</Text>
       case 'taken':
-        return <Text style={[styles.statusIcon, styles.errorIcon]}>✗</Text>
+        return <Text style={{ fontSize: 18, color: '#dc2626', fontWeight: 'bold' }}>✗</Text>
       default:
         return null
     }
   }
 
-  const styles = createStyles(colors)
   const behaviour = useBehavior()
-  const tintColor = useThemeColor({}, 'tint')
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={behaviour}>
+    <KeyboardAvoidingView
+      className="flex-1 bg-light-background dark:bg-dark-background"
+      behavior={behaviour}
+    >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          paddingHorizontal: Spacing.xl,
+          paddingVertical: Spacing['4xl'],
+        }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <Animated.View
           style={[
-            styles.content,
+            { width: '100%', maxWidth: 400, alignSelf: 'center' },
             {
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
@@ -357,23 +361,38 @@ export default function Register() {
           ]}
         >
           {/* Logo & Header */}
-          <View style={styles.header}>
-            <Text style={styles.logo}>VESTIA</Text>
-            <View style={styles.divider} />
-            <Text style={styles.subtitle}>Create your account</Text>
+          <View className="items-center" style={{ marginBottom: Spacing['3xl'] }}>
+            <Text
+              className="mb-base text-light-text-primary dark:text-dark-text-primary"
+              style={{
+                fontFamily: Typography.family.display,
+                fontSize: Typography.size.hero,
+                fontWeight: Typography.weight.black,
+                letterSpacing: Typography.letterSpacing.tight,
+              }}
+            >
+              VESTIA
+            </Text>
+            <View className="w-[60px] h-[2px] mb-lg" style={{ backgroundColor: tintColor }} />
+            <Text
+              className="text-body uppercase text-light-text-tertiary dark:text-dark-text-tertiary"
+              style={{ letterSpacing: Typography.letterSpacing.wide }}
+            >
+              Create your account
+            </Text>
           </View>
 
           {/* Form */}
           <Animated.View
             style={[
-              styles.form,
+              { gap: Spacing.lg },
               {
                 transform: [{ translateX: shakeAnim }],
               },
             ]}
           >
-            <View style={styles.row}>
-              <View style={styles.halfInput}>
+            <View className="flex-row gap-base">
+              <View className="flex-1">
                 <Input
                   label="Prénom"
                   placeholder="John"
@@ -384,7 +403,7 @@ export default function Register() {
                 />
               </View>
 
-              <View style={styles.halfInput}>
+              <View className="flex-1">
                 <Input
                   label="Nom"
                   placeholder="Doe"
@@ -396,7 +415,7 @@ export default function Register() {
               </View>
             </View>
 
-            <View style={styles.usernameContainer}>
+            <View className="relative">
               <Input
                 label="Nom d'utilisateur"
                 placeholder="johndoe"
@@ -407,9 +426,13 @@ export default function Register() {
                 editable={!loading}
                 error={usernameError || undefined}
               />
-              <View style={styles.usernameStatus}>{getUsernameStatusIcon()}</View>
+              <View className="absolute z-10 right-base" style={{ top: Spacing.xl + Spacing.sm }}>
+                {getUsernameStatusIcon()}
+              </View>
               {usernameStatus === 'available' && (
-                <Text style={styles.fieldSuccess}>✓ Nom d&apos;utilisateur disponible</Text>
+                <Text className="text-caption font-medium mt-xs text-[#22c55e]">
+                  ✓ Nom d&apos;utilisateur disponible
+                </Text>
               )}
             </View>
 
@@ -434,7 +457,7 @@ export default function Register() {
               editable={!loading}
             />
 
-            <View style={styles.passwordWrapper}>
+            <View className="relative">
               <Input
                 label="Mot de passe"
                 placeholder="••••••••"
@@ -447,17 +470,20 @@ export default function Register() {
               />
               <Pressable
                 onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeButton}
+                className="absolute z-10 right-base"
+                style={{ top: Spacing.xl + Spacing.sm }}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color={colors.icon}
+                  color={iconColor}
                 />
               </Pressable>
               {!passwordError && formData.password.length === 0 && (
-                <Text style={styles.hint}>Min. 6 caractères, 1 majuscule, 1 chiffre</Text>
+                <Text className="text-caption mt-xs" style={{ color: textTertiary }}>
+                  Min. 6 caractères, 1 majuscule, 1 chiffre
+                </Text>
               )}
             </View>
 
@@ -473,9 +499,9 @@ export default function Register() {
             />
 
             {error && (
-              <Animated.View style={styles.errorContainer}>
+              <Animated.View className="flex-row items-center gap-sm px-base py-sm bg-[#FEE2E2] rounded-sm border border-[#FECACA]">
                 <Ionicons name="alert-circle-outline" size={18} color="#DC2626" />
-                <Text style={styles.errorText}>{error}</Text>
+                <Text className="flex-1 text-[#DC2626] text-caption font-medium">{error}</Text>
               </Animated.View>
             )}
 
@@ -497,13 +523,17 @@ export default function Register() {
             </TouchableOpacity>
 
             {/* Footer */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Déjà un compte ?</Text>
+            <View className="flex-row justify-center items-center gap-xs mt-xl">
+              <Text className="text-body-sm text-light-text-secondary dark:text-dark-text-secondary">
+                Déjà un compte ?
+              </Text>
               <Pressable
                 onPress={() => router.push('/sign-in')}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.linkText}>Se connecter</Text>
+                <Text className="text-body-sm font-semibold underline" style={{ color: tintColor }}>
+                  Se connecter
+                </Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -512,129 +542,3 @@ export default function Register() {
     </KeyboardAvoidingView>
   )
 }
-
-const createStyles = (colors: typeof Colors.light) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    scrollContent: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingHorizontal: Spacing.xl,
-      paddingVertical: Spacing['4xl'],
-    },
-    content: {
-      width: '100%',
-      maxWidth: 400,
-      alignSelf: 'center',
-    },
-    header: {
-      alignItems: 'center',
-      marginBottom: Spacing['3xl'],
-    },
-    logo: {
-      fontFamily: Typography.family.display,
-      fontSize: Typography.size.hero,
-      fontWeight: Typography.weight.black,
-      color: colors.text,
-      letterSpacing: Typography.letterSpacing.tight,
-      marginBottom: Spacing.base,
-    },
-    divider: {
-      width: 60,
-      height: 2,
-      backgroundColor: colors.tint,
-      marginBottom: Spacing.lg,
-    },
-    subtitle: {
-      fontSize: Typography.size.body,
-      fontWeight: Typography.weight.regular,
-      color: colors.textTertiary,
-      letterSpacing: Typography.letterSpacing.wide,
-      textTransform: 'uppercase',
-    },
-    form: {
-      gap: Spacing.lg,
-    },
-    row: {
-      flexDirection: 'row',
-      gap: Spacing.base,
-    },
-    halfInput: {
-      flex: 1,
-    },
-    usernameContainer: {
-      position: 'relative',
-    },
-    usernameStatus: {
-      position: 'absolute',
-      right: Spacing.base,
-      top: Spacing.xl + Spacing.sm,
-      zIndex: 10,
-    },
-    statusIcon: {
-      fontSize: 18,
-      color: '#22c55e',
-      fontWeight: 'bold',
-    },
-    errorIcon: {
-      color: '#dc2626',
-    },
-    fieldSuccess: {
-      fontSize: Typography.size.caption,
-      color: '#22c55e',
-      marginTop: Spacing.xs,
-      fontWeight: Typography.weight.medium,
-    },
-    passwordWrapper: {
-      position: 'relative',
-    },
-    eyeButton: {
-      position: 'absolute',
-      right: Spacing.base,
-      top: Spacing.xl + Spacing.sm,
-      zIndex: 10,
-    },
-    hint: {
-      fontSize: Typography.size.caption,
-      color: colors.textTertiary,
-      marginTop: Spacing.xs,
-    },
-    errorContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.sm,
-      paddingHorizontal: Spacing.base,
-      paddingVertical: Spacing.sm,
-      backgroundColor: '#FEE2E2',
-      borderRadius: Radius.sm,
-      borderWidth: 1,
-      borderColor: '#FECACA',
-    },
-    errorText: {
-      flex: 1,
-      color: '#DC2626',
-      fontSize: Typography.size.caption,
-      fontWeight: Typography.weight.medium,
-    },
-    footer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: Spacing.xs,
-      marginTop: Spacing.xl,
-    },
-    footerText: {
-      color: colors.textSecondary,
-      fontSize: Typography.size.bodySmall,
-      fontWeight: Typography.weight.regular,
-    },
-    linkText: {
-      color: colors.tint,
-      fontSize: Typography.size.bodySmall,
-      fontWeight: Typography.weight.semibold,
-      textDecorationLine: 'underline',
-    },
-  })
