@@ -2,7 +2,14 @@ import type { MediaAssetWithUri } from '@/components/media-gallery/types/media-g
 import type { ItemFormState } from '@/types/item-analysis'
 
 // États possibles du flux de création
-export type AddItemStep = 'select-image' | 'camera' | 'analyzing' | 'form' | 'submitting'
+export type AddItemStep = 'select-image' | 'camera' | 'analyzing' | 'forms'
+
+// Un item dans la liste des formulaires multi
+export interface FormItem {
+  image: MediaAssetWithUri
+  formState: ItemFormState
+  isSubmitting: boolean
+}
 
 // Props communes pour les composants de step
 export interface StepProps {
@@ -12,19 +19,18 @@ export interface StepProps {
 
 // Props pour ImageSelector
 export interface ImageSelectorProps extends StepProps {
-  selectedImage: MediaAssetWithUri | null
+  selectedImages: MediaAssetWithUri[]
   errorMessage: string | null
   onPickImage: () => void
   onOpenCamera: () => void
-  setStep: (step: AddItemStep) => void
+  onAnalyze: () => void
+  onRemoveImage: (index: number) => void
   setErrorMessage: (message: string | null) => void
-  setFormState: (state: ItemFormState) => void
-  setSelectedImage: (image: MediaAssetWithUri | null) => void
 }
 
 // Props pour AnalyzingStep
 export interface AnalyzingStepProps extends StepProps {
-  selectedImage: MediaAssetWithUri | null
+  selectedImages: MediaAssetWithUri[]
 }
 
 // Props pour ItemForm
@@ -36,9 +42,11 @@ export interface ItemFormProps extends StepProps {
   onSubmit: () => void
   isSubmitDisabled: boolean
   submitButtonText?: string
+  /** Utiliser les composants BottomSheet (true par défaut). Passer false dans un FlatList horizontal. */
+  useBottomSheet?: boolean
 }
 
-// Props pour SubmittingStep
+// Props pour SubmittingStep (utilisé par LoadingSteps)
 export type SubmittingStepProps = StepProps
 
 // État initial du formulaire

@@ -84,7 +84,7 @@ export default function ItemDetailsScreen() {
 
   if (isLoading) {
     return (
-      <ThemedView className="flex-1 justify-center items-center">
+      <ThemedView className="items-center justify-center flex-1">
         <ActivityIndicator size="large" color={tintColor} />
       </ThemedView>
     )
@@ -92,7 +92,7 @@ export default function ItemDetailsScreen() {
 
   if (error || !item) {
     return (
-      <ThemedView className="flex-1 justify-center items-center">
+      <ThemedView className="items-center justify-center flex-1">
         <ThemedText style={{ color: textColor }}>{error || 'Item not found'}</ThemedText>
       </ThemedView>
     )
@@ -158,10 +158,10 @@ export default function ItemDetailsScreen() {
           </View>
 
           {/* Divider */}
-          <View style={[styles.divider, { backgroundColor: borderColor }]} />
+          <View className="h-[1px] my-lg" style={{ backgroundColor: borderColor }} />
 
           {/* Details Section */}
-          <View style={styles.section}>
+          <View className="mb-lg">
             <ThemedText
               style={[
                 {
@@ -208,7 +208,7 @@ export default function ItemDetailsScreen() {
           {/* Description Section */}
           {item.description && (
             <>
-              <View style={[styles.divider, { backgroundColor: borderColor }]} />
+              <View className="h-[1px] my-lg" style={{ backgroundColor: borderColor }} />
 
               <View className="mb-base">
                 <ThemedText
@@ -258,7 +258,7 @@ const DetailRow: React.FC<{
   textColor: string
   textTertiary: string
 }> = ({ label, value, textColor, textTertiary }) => (
-  <View className="flex-row justify-between items-center">
+  <View className="flex-row items-center justify-between">
     <ThemedText
       style={[
         {

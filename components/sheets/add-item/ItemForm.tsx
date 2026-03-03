@@ -1,7 +1,8 @@
 import { ITEM_FORMALITIES, ITEM_SEASONS, ITEM_TYPES } from '@/constants/file_types'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import React from 'react'
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import type { ItemFormProps } from './types'
 
 export const ItemForm = ({
@@ -14,12 +15,18 @@ export const ItemForm = ({
   tintColor,
   textColor,
   submitButtonText = 'Ajouter à ma garde-robe',
+  useBottomSheet = true,
 }: ItemFormProps) => {
+  const isDark = useColorScheme() === 'dark'
+  const selectedTextColor = isDark ? '#0A0A0A' : '#FFFFFF'
   const imageUri =
     imageUrl || selectedImage?.croppedUri || selectedImage?.localUri || selectedImage?.uri
 
+  const InputComponent = useBottomSheet ? BottomSheetTextInput : TextInput
+  const ScrollViewComponent = useBottomSheet ? BottomSheetScrollView : ScrollView
+
   return (
-    <BottomSheetScrollView className="flex-1 p-base">
+    <ScrollViewComponent className="flex-1 p-base">
       {/* Image preview */}
       {imageUri && (
         <Image
@@ -32,7 +39,7 @@ export const ItemForm = ({
 
       {/* Nom */}
       <FormField label="Nom *" textColor={textColor}>
-        <BottomSheetTextInput
+        <InputComponent
           style={{
             borderWidth: 1,
             borderRadius: 8,
@@ -50,7 +57,7 @@ export const ItemForm = ({
 
       {/* Description */}
       <FormField label="Description" textColor={textColor}>
-        <BottomSheetTextInput
+        <InputComponent
           style={{
             borderWidth: 1,
             borderRadius: 8,
@@ -78,6 +85,7 @@ export const ItemForm = ({
           onSelect={(type) => onUpdateField('type', type)}
           tintColor={tintColor}
           textColor={textColor}
+          selectedTextColor={selectedTextColor}
           horizontal
         />
       </FormField>
@@ -90,6 +98,7 @@ export const ItemForm = ({
           onSelect={(season) => onUpdateField('season', season)}
           tintColor={tintColor}
           textColor={textColor}
+          selectedTextColor={selectedTextColor}
         />
       </FormField>
 
@@ -101,13 +110,14 @@ export const ItemForm = ({
           onSelect={(formality) => onUpdateField('formality', formality)}
           tintColor={tintColor}
           textColor={textColor}
+          selectedTextColor={selectedTextColor}
           horizontal
         />
       </FormField>
 
       {/* Couleur principale */}
       <FormField label="Couleur principale *" textColor={textColor}>
-        <BottomSheetTextInput
+        <InputComponent
           style={{
             borderWidth: 1,
             borderRadius: 8,
@@ -125,7 +135,7 @@ export const ItemForm = ({
 
       {/* Marque */}
       <FormField label="Marque" textColor={textColor}>
-        <BottomSheetTextInput
+        <InputComponent
           style={{
             borderWidth: 1,
             borderRadius: 8,
@@ -143,7 +153,7 @@ export const ItemForm = ({
 
       {/* Référence */}
       <FormField label="Référence" textColor={textColor}>
-        <BottomSheetTextInput
+        <InputComponent
           style={{
             borderWidth: 1,
             borderRadius: 8,
@@ -168,11 +178,13 @@ export const ItemForm = ({
         onPress={onSubmit}
         disabled={isSubmitDisabled}
       >
-        <Text className="text-white text-body font-semibold text-center">{submitButtonText}</Text>
+        <Text className="text-body font-semibold text-center" style={{ color: selectedTextColor }}>
+          {submitButtonText}
+        </Text>
       </TouchableOpacity>
 
       <View style={{ height: 50 }} />
-    </BottomSheetScrollView>
+    </ScrollViewComponent>
   )
 }
 
@@ -199,6 +211,7 @@ interface ChipSelectorProps<T extends string> {
   onSelect: (item: T) => void
   tintColor: string
   textColor: string
+  selectedTextColor: string
   horizontal?: boolean
 }
 
@@ -208,6 +221,7 @@ function ChipSelector<T extends string>({
   onSelect,
   tintColor,
   textColor,
+  selectedTextColor,
   horizontal = false,
 }: ChipSelectorProps<T>) {
   const content = (
@@ -221,7 +235,7 @@ function ChipSelector<T extends string>({
         >
           <Text
             className="text-body-sm"
-            style={{ color: selectedItem === item ? '#fff' : textColor }}
+            style={{ color: selectedItem === item ? selectedTextColor : textColor }}
           >
             {item}
           </Text>
