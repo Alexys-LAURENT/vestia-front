@@ -173,7 +173,7 @@ const PickItemsSheet = ({
         <BottomSheetFlatList
           data={items}
           renderItem={renderItemCard}
-          keyExtractor={(item) => String(item.idItem)}
+          keyExtractor={(item: Item) => String(item.idItem)}
           numColumns={2}
           columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 16 }}
           contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}

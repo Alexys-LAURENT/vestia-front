@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text'
 import { LookCard } from '@/components/wardrobe/LookCard'
-import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { usePlannedOutfits } from '@/hooks/usePlannedOutfits'
 import type { PlannedOutfit } from '@/types/entities'
@@ -22,11 +21,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const SCREEN_WIDTH = Dimensions.get('window').width
 
 export default function CalendarScreen() {
-  const isDark = useColorScheme() === 'dark'
   const backgroundColor = useThemeColor({}, 'background')
   const textColor = useThemeColor({}, 'text')
   const tintColor = useThemeColor({}, 'tint')
-  const selectedTextColor = isDark ? '#0A0A0A' : '#FFFFFF'
+  const selectedTextColor = useThemeColor({}, 'onTint')
   const borderColor = useThemeColor({}, 'border')
   const mutedColor = `${textColor}80`
 

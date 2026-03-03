@@ -1,5 +1,5 @@
 import PickItemsSheet from '@/components/sheets/PickItemsSheet'
-import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useThemeColor } from '@/hooks/use-theme-color'
 import type { Item } from '@/types/entities'
 import { AttachedItem, MyUIMessage } from '@/types/my_ui_message'
 import { getStoredToken } from '@/utils/fetchApiClientSide'
@@ -39,8 +39,9 @@ export default function ChatWrapper() {
   const [selectedItems, setSelectedItems] = useState<Item[]>([])
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const API_URL = process.env.EXPO_PUBLIC_API_URL
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+  const textColor = useThemeColor({}, 'text')
+  const textSecondaryColor = useThemeColor({}, 'textSecondary')
+  const textTertiaryColor = useThemeColor({}, 'textTertiary')
 
   const { messages, setMessages, error, sendMessage, status } = useChat<MyUIMessage>({
     transport: new DefaultChatTransport({
@@ -121,19 +122,11 @@ export default function ChatWrapper() {
     <View className="items-center justify-center flex-1 px-lg">
       {/* Brand mark */}
       <View className="items-center mb-xl">
-        <Text className="text-[40px] mb-md" style={{ color: isDark ? '#FAFAFA' : '#0A0A0A' }}>
-          ✦
-        </Text>
-        <Text
-          className="font-bold tracking-tight text-heading"
-          style={{ color: isDark ? '#FAFAFA' : '#0A0A0A' }}
-        >
+        <Text className="text-[40px] mb-md text-light-text dark:text-dark-text">✦</Text>
+        <Text className="font-bold tracking-tight text-heading text-light-text dark:text-dark-text">
           Vestia AI
         </Text>
-        <Text
-          className="text-center text-body-sm mt-xs"
-          style={{ color: isDark ? '#707070' : '#8A8A8A' }}
-        >
+        <Text className="text-center text-body-sm mt-xs text-light-textTertiary dark:text-dark-textTertiary">
           Votre styliste personnel intelligent
         </Text>
       </View>
@@ -144,17 +137,13 @@ export default function ChatWrapper() {
           <Pressable
             key={i}
             onPress={() => handleSuggestion(prompt.text)}
-            style={{
-              backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
-              borderColor: isDark ? '#2F2F2F' : '#E0E0E0',
-            }}
-            className="flex-row items-center border rounded-lg px-base py-md active:opacity-70"
+            className="flex-row items-center border border-light-ui-border dark:border-dark-ui-border bg-light-backgroundSecondary dark:bg-dark-backgroundSecondary rounded-lg px-base py-md active:opacity-70"
           >
             <Text className="text-[18px] mr-md">{prompt.icon}</Text>
-            <Text className="flex-1 text-body-sm" style={{ color: isDark ? '#B8B8B8' : '#404040' }}>
+            <Text className="flex-1 text-body-sm text-light-textSecondary dark:text-dark-textSecondary">
               {prompt.text}
             </Text>
-            <FontAwesome name="angle-right" size={16} color="#8A8A8A" />
+            <FontAwesome name="angle-right" size={16} color={textTertiaryColor} />
           </Pressable>
         ))}
       </View>
@@ -166,23 +155,16 @@ export default function ChatWrapper() {
       {/* Header with new conversation button */}
       {messages.length > 0 && (
         <View className="flex-row items-center justify-between border-b border-light-ui-border dark:border-dark-ui-border px-base py-sm">
-          <Text
-            className="font-semibold text-body"
-            style={{ color: isDark ? '#FAFAFA' : '#0A0A0A' }}
-          >
+          <Text className="font-semibold text-body text-light-text dark:text-dark-text">
             Vestia AI
           </Text>
           <Pressable
             onPress={handleNewConversation}
             disabled={isStreaming}
-            style={{ backgroundColor: isDark ? '#252525' : '#F5F5F5' }}
-            className={`flex-row items-center gap-xs px-md py-xs rounded-full active:opacity-70 ${isStreaming ? 'opacity-40' : ''}`}
+            className={`flex-row items-center gap-xs px-md py-xs rounded-full bg-light-backgroundTertiary dark:bg-dark-backgroundTertiary active:opacity-70 ${isStreaming ? 'opacity-40' : ''}`}
           >
-            <FontAwesome name="plus" size={12} color="#8A8A8A" />
-            <Text
-              className="font-medium text-body-sm"
-              style={{ color: isDark ? '#B8B8B8' : '#404040' }}
-            >
+            <FontAwesome name="plus" size={12} color={textTertiaryColor} />
+            <Text className="font-medium text-body-sm text-light-textSecondary dark:text-dark-textSecondary">
               Nouveau
             </Text>
           </Pressable>
@@ -229,10 +211,7 @@ export default function ChatWrapper() {
           {/* Streaming indicator */}
           {isStreaming && (
             <View className="px-base py-xs">
-              <Text
-                className="italic text-caption"
-                style={{ color: isDark ? '#707070' : '#8A8A8A' }}
-              >
+              <Text className="italic text-caption text-light-textTertiary dark:text-dark-textTertiary">
                 Vestia réfléchit...
               </Text>
             </View>
@@ -267,22 +246,22 @@ export default function ChatWrapper() {
             {/* Pick items button */}
             <Pressable
               onPress={() => setIsPickerOpen(true)}
-              className="w-[44px] h-[44px] rounded-full items-center justify-center bg-light-bg-tertiary dark:bg-dark-bg-tertiary active:opacity-70"
+              className="w-[44px] h-[44px] rounded-xl items-center justify-center bg-light-backgroundSecondary dark:bg-dark-backgroundSecondary border border-light-border dark:border-dark-border active:opacity-70"
             >
-              <FontAwesome name="plus" size={18} color="#8A8A8A" />
+              <FontAwesome name="plus" size={18} color={textTertiaryColor} />
             </Pressable>
 
-            <View className="flex-1 bg-light-bg-tertiary dark:bg-dark-bg-tertiary rounded-xl px-base py-[10px] min-h-[44px] justify-center">
+            <View className="flex-1 bg-light-backgroundSecondary dark:bg-dark-backgroundSecondary border border-light-border dark:border-dark-border rounded-xl px-base py-[10px] min-h-[44px] justify-center">
               <TextInput
                 className="text-body"
                 placeholder="Écrivez votre message..."
-                placeholderTextColor="#8A8A8A"
+                placeholderTextColor={textTertiaryColor}
                 value={input}
                 onChangeText={setInput}
                 onSubmitEditing={handleSend}
                 multiline
                 maxLength={1000}
-                style={{ maxHeight: 100, lineHeight: 20, color: isDark ? '#FAFAFA' : '#0A0A0A' }}
+                style={{ maxHeight: 100, lineHeight: 20, color: textColor }}
                 returnKeyType="send"
                 blurOnSubmit={false}
               />
@@ -291,12 +270,12 @@ export default function ChatWrapper() {
             <Pressable
               onPress={handleSend}
               disabled={!input.trim() || isStreaming}
-              className="w-[44px] h-[44px] rounded-full items-center justify-center bg-light-bg-tertiary dark:bg-dark-bg-tertiary active:opacity-70"
+              className="w-[44px] h-[44px] rounded-xl items-center justify-center bg-light-backgroundSecondary dark:bg-dark-backgroundSecondary border border-light-border dark:border-dark-border active:opacity-70"
             >
               <FontAwesome
                 name="arrow-up"
                 size={16}
-                color={input.trim() && !isStreaming ? (isDark ? '#FAFAFA' : '#1A1A1A') : '#8A8A8A'}
+                color={input.trim() && !isStreaming ? textSecondaryColor : textTertiaryColor}
               />
             </Pressable>
           </View>

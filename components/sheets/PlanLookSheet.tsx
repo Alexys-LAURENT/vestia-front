@@ -1,5 +1,4 @@
 import { ThemedText } from '@/components/themed-text'
-import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -15,10 +14,10 @@ interface PlanLookSheetProps {
 
 export const PlanLookSheet: React.FC<PlanLookSheetProps> = ({ isOpen, onClose, onConfirm }) => {
   const sheetRef = useSheetRef()
-  const isDark = useColorScheme() === 'dark'
   const backgroundColor = useThemeColor({}, 'background')
   const textColor = useThemeColor({}, 'text')
   const tintColor = useThemeColor({}, 'tint')
+  const onTintColor = useThemeColor({}, 'onTint')
   const borderColor = useThemeColor({}, 'border')
 
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -141,10 +140,7 @@ export const PlanLookSheet: React.FC<PlanLookSheetProps> = ({ isOpen, onClose, o
             style={{ backgroundColor: tintColor }}
             onPress={handleConfirm}
           >
-            <ThemedText
-              className="text-center font-semibold"
-              style={{ color: isDark ? '#0A0A0A' : '#FFFFFF' }}
-            >
+            <ThemedText className="text-center font-semibold" style={{ color: onTintColor }}>
               Planifier
             </ThemedText>
           </TouchableOpacity>

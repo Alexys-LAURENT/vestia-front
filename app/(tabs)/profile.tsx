@@ -79,11 +79,11 @@ const isValidBirthDate = (date: string): boolean => {
 export default function ProfileScreen() {
   const { session, signOut, updateSession } = useSession()
   const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
   const theme = colorScheme === 'dark' ? 'dark' : 'light'
   const colors = Colors[theme]
   const shadows = Shadows[theme]
   const tintColor = useThemeColor({}, 'tint')
+  const onTintColor = useThemeColor({}, 'onTint')
   const behaviour = useBehavior()
 
   // ─── Profile form state ─────────────────────────────
@@ -503,7 +503,7 @@ export default function ProfileScreen() {
                   fontSize: Typography.size.subheading,
                   fontWeight: Typography.weight.semibold,
                   marginBottom: 2,
-                  color: isDark ? '#FAFAFA' : '#0A0A0A',
+                  color: colors.text,
                 }}
               >
                 {session?.firstName} {session?.lastName}
@@ -511,7 +511,7 @@ export default function ProfileScreen() {
               <Text
                 style={{
                   letterSpacing: Typography.letterSpacing.wide,
-                  color: isDark ? '#707070' : '#8A8A8A',
+                  color: colors.textTertiary,
                 }}
               >
                 @{session?.username}
@@ -529,7 +529,7 @@ export default function ProfileScreen() {
                   className="text-body font-semibold uppercase"
                   style={{
                     letterSpacing: Typography.letterSpacing.wide,
-                    color: isDark ? '#FAFAFA' : '#0A0A0A',
+                    color: colors.text,
                   }}
                 >
                   Informations personnelles
@@ -649,11 +649,11 @@ export default function ProfileScreen() {
                   activeOpacity={0.7}
                 >
                   {profileLoading ? (
-                    <ActivityIndicator color={isDark ? '#0A0A0A' : '#fff'} size="small" />
+                    <ActivityIndicator color={onTintColor} size="small" />
                   ) : (
                     <ThemedText
                       style={{
-                        color: isDark ? '#0A0A0A' : '#fff',
+                        color: onTintColor,
                         fontWeight: Typography.weight.semibold,
                         fontSize: Typography.size.body,
                       }}
@@ -676,7 +676,7 @@ export default function ProfileScreen() {
                   className="text-body font-semibold uppercase"
                   style={{
                     letterSpacing: Typography.letterSpacing.wide,
-                    color: isDark ? '#FAFAFA' : '#0A0A0A',
+                    color: colors.text,
                   }}
                 >
                   Modifier le mot de passe
@@ -794,11 +794,11 @@ export default function ProfileScreen() {
                   activeOpacity={0.7}
                 >
                   {passwordLoading ? (
-                    <ActivityIndicator color={isDark ? '#0A0A0A' : '#fff'} size="small" />
+                    <ActivityIndicator color={onTintColor} size="small" />
                   ) : (
                     <ThemedText
                       style={{
-                        color: isDark ? '#0A0A0A' : '#fff',
+                        color: onTintColor,
                         fontWeight: Typography.weight.semibold,
                         fontSize: Typography.size.body,
                       }}

@@ -1,4 +1,3 @@
-import { useColorScheme } from '@/hooks/use-color-scheme'
 import { MyUIMessage } from '@/types/my_ui_message'
 import { Text, View } from 'react-native'
 
@@ -8,8 +7,6 @@ interface SemanticSearchToolRendererProps {
 }
 
 export const SemanticSearchToolRenderer = ({ part, index }: SemanticSearchToolRendererProps) => {
-  const isDark = useColorScheme() === 'dark'
-
   if (part.state === 'input-streaming' || part.state === 'input-available') {
     return (
       <View
@@ -17,7 +14,7 @@ export const SemanticSearchToolRenderer = ({ part, index }: SemanticSearchToolRe
         className="flex-row items-center gap-xs py-xs"
       >
         <Text className="text-caption">🧠</Text>
-        <Text className="text-caption italic" style={{ color: isDark ? '#707070' : '#8A8A8A' }}>
+        <Text className="text-caption italic text-light-textTertiary dark:text-dark-textTertiary">
           Recherche sémantique...
         </Text>
       </View>
@@ -43,7 +40,7 @@ export const SemanticSearchToolRenderer = ({ part, index }: SemanticSearchToolRe
         className="flex-row items-center gap-xs py-xs"
       >
         <Text className="text-caption">✓</Text>
-        <Text className="text-caption italic" style={{ color: isDark ? '#707070' : '#8A8A8A' }}>
+        <Text className="text-caption italic text-light-textTertiary dark:text-dark-textTertiary">
           Recherche terminée
         </Text>
       </View>

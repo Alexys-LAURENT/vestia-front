@@ -1,5 +1,5 @@
 import { ITEM_FORMALITIES, ITEM_SEASONS, ITEM_TYPES } from '@/constants/file_types'
-import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useThemeColor } from '@/hooks/use-theme-color'
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
@@ -17,13 +17,26 @@ export const ItemForm = ({
   submitButtonText = 'Ajouter à ma garde-robe',
   useBottomSheet = true,
 }: ItemFormProps) => {
-  const isDark = useColorScheme() === 'dark'
-  const selectedTextColor = isDark ? '#0A0A0A' : '#FFFFFF'
+  const selectedTextColor = useThemeColor({}, 'onTint')
+  const borderColor = useThemeColor({}, 'border')
+  const inputBackground = useThemeColor({}, 'backgroundSecondary')
+  const placeholderColor = useThemeColor({}, 'textTertiary')
   const imageUri =
     imageUrl || selectedImage?.croppedUri || selectedImage?.localUri || selectedImage?.uri
 
   const InputComponent = useBottomSheet ? BottomSheetTextInput : TextInput
   const ScrollViewComponent = useBottomSheet ? BottomSheetScrollView : ScrollView
+
+  const inputStyle = {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: textColor,
+    backgroundColor: inputBackground,
+    borderColor,
+  }
 
   return (
     <ScrollViewComponent className="flex-1 p-base">
@@ -40,38 +53,22 @@ export const ItemForm = ({
       {/* Nom */}
       <FormField label="Nom *" textColor={textColor}>
         <InputComponent
-          style={{
-            borderWidth: 1,
-            borderRadius: 8,
-            padding: 12,
-            fontSize: 16,
-            color: textColor,
-            borderColor: tintColor,
-          }}
+          style={inputStyle}
           value={formState.name}
           onChangeText={(value) => onUpdateField('name', value)}
           placeholder="Nom du vêtement"
-          placeholderTextColor={`${textColor}80`}
+          placeholderTextColor={placeholderColor}
         />
       </FormField>
 
       {/* Description */}
       <FormField label="Description" textColor={textColor}>
         <InputComponent
-          style={{
-            borderWidth: 1,
-            borderRadius: 8,
-            padding: 12,
-            fontSize: 16,
-            height: 180,
-            textAlignVertical: 'top',
-            color: textColor,
-            borderColor: tintColor,
-          }}
+          style={{ ...inputStyle, height: 180, textAlignVertical: 'top' }}
           value={formState.description}
           onChangeText={(value) => onUpdateField('description', value)}
           placeholder="Description du vêtement"
-          placeholderTextColor={`${textColor}80`}
+          placeholderTextColor={placeholderColor}
           multiline
           numberOfLines={5}
         />
@@ -118,54 +115,33 @@ export const ItemForm = ({
       {/* Couleur principale */}
       <FormField label="Couleur principale *" textColor={textColor}>
         <InputComponent
-          style={{
-            borderWidth: 1,
-            borderRadius: 8,
-            padding: 12,
-            fontSize: 16,
-            color: textColor,
-            borderColor: tintColor,
-          }}
+          style={inputStyle}
           value={formState.mainColor}
           onChangeText={(value) => onUpdateField('mainColor', value)}
           placeholder="Ex: Bleu marine"
-          placeholderTextColor={`${textColor}80`}
+          placeholderTextColor={placeholderColor}
         />
       </FormField>
 
       {/* Marque */}
       <FormField label="Marque" textColor={textColor}>
         <InputComponent
-          style={{
-            borderWidth: 1,
-            borderRadius: 8,
-            padding: 12,
-            fontSize: 16,
-            color: textColor,
-            borderColor: tintColor,
-          }}
+          style={inputStyle}
           value={formState.brand}
           onChangeText={(value) => onUpdateField('brand', value)}
           placeholder="Ex: Nike, Zara..."
-          placeholderTextColor={`${textColor}80`}
+          placeholderTextColor={placeholderColor}
         />
       </FormField>
 
       {/* Référence */}
       <FormField label="Référence" textColor={textColor}>
         <InputComponent
-          style={{
-            borderWidth: 1,
-            borderRadius: 8,
-            padding: 12,
-            fontSize: 16,
-            color: textColor,
-            borderColor: tintColor,
-          }}
+          style={inputStyle}
           value={formState.reference}
           onChangeText={(value) => onUpdateField('reference', value)}
           placeholder="Référence du produit"
-          placeholderTextColor={`${textColor}80`}
+          placeholderTextColor={placeholderColor}
         />
       </FormField>
 
@@ -178,7 +154,7 @@ export const ItemForm = ({
         onPress={onSubmit}
         disabled={isSubmitDisabled}
       >
-        <Text className="text-body font-semibold text-center" style={{ color: selectedTextColor }}>
+        <Text className="font-semibold text-center text-body" style={{ color: selectedTextColor }}>
           {submitButtonText}
         </Text>
       </TouchableOpacity>
@@ -198,7 +174,10 @@ interface FormFieldProps {
 
 const FormField = ({ label, textColor, children }: FormFieldProps) => (
   <View className="mb-[20px]">
-    <Text className="text-body-sm font-semibold mb-sm" style={{ color: textColor }}>
+    <Text
+      className="font-medium uppercase text-caption mb-sm"
+      style={{ color: textColor, letterSpacing: 0.5 }}
+    >
       {label}
     </Text>
     {children}

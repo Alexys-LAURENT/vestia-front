@@ -1,4 +1,3 @@
-import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useThemeColor } from '@/hooks/use-theme-color'
 import { Ionicons } from '@expo/vector-icons'
 import { CameraView, useCameraPermissions, type CameraType } from 'expo-camera'
@@ -20,8 +19,7 @@ export const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
   const [permission, requestPermission] = useCameraPermissions()
 
   const tintColor = useThemeColor({}, 'tint')
-  const isDark = useColorScheme() === 'dark'
-  const selectedTextColor = isDark ? '#0A0A0A' : '#FFFFFF'
+  const selectedTextColor = useThemeColor({}, 'onTint')
 
   const toggleFacing = useCallback(() => {
     setFacing((prev) => (prev === 'back' ? 'front' : 'back'))

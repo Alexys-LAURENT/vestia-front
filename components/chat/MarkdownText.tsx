@@ -231,13 +231,17 @@ export default function MarkdownText({ children }: MarkdownTextProps) {
         inlineCode: {
           fontFamily: 'monospace',
           fontSize: 13,
-          backgroundColor: isDark ? '#2A2A2A' : '#F0F0F0',
-          color: isDark ? '#E8E8E8' : '#1A1A1A',
+          backgroundColor: isDark
+            ? Colors.dark.backgroundTertiary
+            : Colors.light.backgroundTertiary,
+          color: isDark ? Colors.dark.text : Colors.light.text,
           borderRadius: 4,
           paddingHorizontal: 4,
         },
         codeBlock: {
-          backgroundColor: isDark ? '#1A1A1A' : '#F5F5F5',
+          backgroundColor: isDark
+            ? Colors.dark.backgroundSecondary
+            : Colors.light.backgroundTertiary,
           borderRadius: 8,
           paddingHorizontal: 12,
           paddingVertical: 10,
@@ -248,7 +252,7 @@ export default function MarkdownText({ children }: MarkdownTextProps) {
           fontFamily: 'monospace',
           fontSize: 12.5,
           lineHeight: 18,
-          color: isDark ? '#D4D4D4' : '#2F2F2F',
+          color: isDark ? Colors.dark.textSecondary : Colors.light.textSecondary,
         },
         bulletRow: {
           flexDirection: 'row' as const,

@@ -1,4 +1,4 @@
-import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useThemeColor } from '@/hooks/use-theme-color'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
@@ -16,8 +16,7 @@ export const ImageSelector = ({
   tintColor,
   textColor,
 }: ImageSelectorProps) => {
-  const isDark = useColorScheme() === 'dark'
-  const selectedTextColor = isDark ? '#0A0A0A' : '#FFFFFF'
+  const selectedTextColor = useThemeColor({}, 'onTint')
   const hasImages = selectedImages.length > 0
 
   return (

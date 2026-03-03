@@ -1,4 +1,3 @@
-import { useColorScheme } from '@/hooks/use-color-scheme'
 import { MyUIMessage } from '@/types/my_ui_message'
 import { Text, View } from 'react-native'
 
@@ -8,13 +7,11 @@ interface GetWeatherToolRendererProps {
 }
 
 export const GetWeatherToolRenderer = ({ part, index }: GetWeatherToolRendererProps) => {
-  const isDark = useColorScheme() === 'dark'
-
   if (part.state === 'input-streaming' || part.state === 'input-available') {
     return (
       <View key={`part-tool-weather-${index}`} className="flex-row items-center gap-xs py-xs">
         <Text className="text-caption">🌤️</Text>
-        <Text className="text-caption italic" style={{ color: isDark ? '#707070' : '#8A8A8A' }}>
+        <Text className="text-caption italic text-light-textTertiary dark:text-dark-textTertiary">
           Récupération de la météo...
         </Text>
       </View>
@@ -36,7 +33,7 @@ export const GetWeatherToolRenderer = ({ part, index }: GetWeatherToolRendererPr
     return (
       <View key={`part-tool-weather-${index}`} className="flex-row items-center gap-xs py-xs">
         <Text className="text-caption">✓</Text>
-        <Text className="text-caption italic" style={{ color: isDark ? '#707070' : '#8A8A8A' }}>
+        <Text className="text-caption italic text-light-textTertiary dark:text-dark-textTertiary">
           Météo récupérée
         </Text>
       </View>
